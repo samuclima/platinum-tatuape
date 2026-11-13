@@ -1,0 +1,25 @@
+# Ignore everything …
+/*
+
+# … except the site itself: the home page, the apartment tours + 3D engine, the 360° building visit
+!/.gitignore
+!/index.html
+!/tour.html
+!/src/
+!/package.json
+!/package-lock.json
+!/vite.config.js
+!/start.bat
+
+# public/: only what those pages load
+!/public/
+/public/*
+!/public/home/
+!/public/visita/
+!/public/data/
+# (the old brochure page is ignored; the visit's loading screen uses one of its images)
+!/public/platinum/
+/public/platinum/*
+!/public/platinum/img/
+/public/platinum/img/*
+!/public/platinum/img/lobby.jpg

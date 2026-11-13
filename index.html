@@ -1,0 +1,1159 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#151c3a" />
+<link rel="icon" href="data:," />
+<title>Platinum Tatuapé</title>
+<link rel="preload" as="image" href="home/bg.jpg" media="(min-width: 700px)" />
+<link rel="preload" as="image" href="home/bg-960.jpg" media="(max-width: 699px)" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #eef3ff; --ink-dim: rgba(226, 236, 255, .72); --navy: #151c3a; --line: rgba(255, 255, 255, .16);
+    --bg: url(home/bg.jpg);
+    --ease: cubic-bezier(.22, .9, .24, 1);
+  }
+  @media (max-width: 699px) { :root { --bg: url(home/bg-960.jpg); } }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--navy); color: var(--ink); font-family: Manrope, system-ui, "Segoe UI", sans-serif; }
+  body { overflow-x: hidden; }
+  body.locked { overflow: hidden; }
+
+  /* ---------------- HERO: glass panels + logo ---------------- */
+  .hero { position: relative; height: 100vh; height: 100svh; min-height: 520px; overflow: hidden; isolation: isolate; }
+  .hero .bg {
+    position: absolute; inset: 0; background: var(--bg) center / cover no-repeat;
+    transform: scale(1.18); filter: blur(18px) brightness(.7); opacity: 0;
+    animation: bgIn 2.4s var(--ease) .15s forwards, bgDrift 26s ease-in-out 2.6s infinite alternate;
+  }
+  @keyframes bgIn { to { transform: scale(1.04); filter: blur(0) brightness(1); opacity: 1; } }
+  @keyframes bgDrift { from { transform: scale(1.04) translate3d(0, 0, 0); } to { transform: scale(1.1) translate3d(-1.5%, -1%, 0); } }
+
+  /* the glass panes: each one shows the same picture, slightly shifted + magnified (refraction), with a frosted edge */
+  .panes { position: absolute; inset: 0; display: flex; pointer-events: none; }
+  .pane {
+    position: relative; flex: 1 1 0; overflow: hidden;
+    border-left: 1px solid rgba(255, 255, 255, .14);
+    box-shadow: inset 1px 0 0 rgba(255, 255, 255, .06), inset -14px 0 28px -18px rgba(0, 0, 0, .55);
+    transform: translate3d(0, var(--from, 110%), 0) skewY(var(--skew, 0deg)); opacity: 0;
+    animation: paneIn 1.5s var(--ease) var(--d, 0s) forwards;
+  }
+  .pane:first-child { border-left: 0; }
+  .pane::before {                                     /* refracted picture inside the pane */
+    content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--x, 0px) * -1); width: var(--vw, 100vw);
+    background: var(--bg) center / cover no-repeat; transform: scale(1.06) translateX(var(--shift, 0px));
+    filter: saturate(1.15) brightness(1.06);
+  }
+  .pane::after {                                      /* glass sheen: soft vertical highlight + travelling light */
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0) 78%, rgba(255, 255, 255, .05)),
+      linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .16) 48%, rgba(255, 255, 255, 0) 56%);
+    background-size: 100% 100%, 100% 260%; background-position: 0 0, 0 140%;
+    animation: sheen 7s ease-in-out calc(var(--d, 0s) + 2s) infinite;
+  }
+  @keyframes paneIn { to { transform: translate3d(0, 0, 0) skewY(0); opacity: 1; } }
+  @keyframes sheen { 0%, 55% { background-position: 0 0, 0 140%; } 100% { background-position: 0 0, 0 -40%; } }
+  .panes.settle .pane { animation: paneIn 0s forwards, paneFloat 9s ease-in-out var(--d, 0s) infinite alternate; }
+  @keyframes paneFloat { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, var(--float, 6px), 0); } }
+
+  .stage { position: relative; height: 100%; overflow: hidden; isolation: isolate; }
+  .shade { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 55% at 50% 48%, rgba(10, 16, 40, .05), rgba(10, 16, 40, .55)); pointer-events: none; }
+
+  /* logo + wordmark */
+  .brand { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; padding: 24px 16px; }
+  .logo { width: clamp(150px, 34vmin, 300px); height: auto; overflow: visible; filter: drop-shadow(0 10px 30px rgba(0, 8, 30, .45)); }
+  .logo .petal { opacity: 0; transform-box: fill-box; transform-origin: var(--ox) var(--oy);
+    transform: translate(var(--tx), var(--ty)) rotate(-70deg) scale(.4);
+    animation: petalIn 1.25s var(--ease) var(--d) forwards; }
+  @keyframes petalIn { 60% { opacity: 1; } to { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); } }
+  .logo .ring { fill: transparent; stroke: url(#silver); stroke-width: .7; stroke-dasharray: 140; stroke-dashoffset: 140;
+    animation: draw 1.1s ease-out 2.3s forwards, fillIn .6s ease 3.1s forwards; }
+  .logo .core { opacity: 0; transform-box: fill-box; transform-origin: 30% 50%; transform: scale(.3);
+    animation: coreIn .9s var(--ease) 2.9s forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes fillIn { to { fill: url(#silver); stroke-width: 0; } }
+  @keyframes coreIn { to { opacity: 1; transform: scale(1); } }
+  .logo .spin { transform-box: fill-box; transform-origin: 50% 50%; animation: settle 1.6s var(--ease) 1.4s both; }
+  @keyframes settle { from { transform: rotate(-45deg); } to { transform: rotate(0); } }
+
+  /* the brochure wordmark (public/home/wordmark.png, white on transparent) used as a mask: silver fill with a moving
+     shine; it is revealed left → right with a soft blur */
+  .word { margin: clamp(20px, 3.6vmin, 34px) 0 0; width: clamp(230px, 58vmin, 560px); aspect-ratio: 3168 / 503;
+    -webkit-mask: url(home/wordmark.png) center / contain no-repeat; mask: url(home/wordmark.png) center / contain no-repeat;
+    background: linear-gradient(100deg, #ffffff 0%, #e6e9ee 38%, #ffffff 46%, #cfd4db 54%, #f4f6f8 100%) 0 0 / 300% 100%;
+    clip-path: inset(0 100% 0 0); filter: blur(6px); opacity: 0;
+    animation: wordIn 1.5s var(--ease) 3.3s forwards, wordShine 6s ease-in-out 5s infinite; }
+  @media (max-width: 699px) { .word { width: min(80vw, 420px); } }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @keyframes wordIn { to { clip-path: inset(0 0 0 0); filter: blur(0); opacity: 1; } }
+  @keyframes wordShine { 0%, 40% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+  @keyframes fadeUp { from { transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  .cta { position: absolute; left: 50%; bottom: max(28px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+    display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 999px; text-decoration: none;
+    color: var(--ink); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap;
+    background: rgba(255, 255, 255, .08); border: 1px solid var(--line); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    opacity: 0; animation: ctaIn 1s var(--ease) 4.4s forwards; transition: background .25s, border-color .25s; }
+  .cta:hover, .cta:focus-visible { background: rgba(255, 255, 255, .16); border-color: rgba(255, 255, 255, .35); outline: none; }
+  .cta svg { width: 14px; height: 14px; animation: nudge 1.8s ease-in-out 5.4s infinite; }
+  @keyframes ctaIn { from { transform: translate(-50%, 14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  @keyframes nudge { 50% { transform: translateY(3px); } }
+  .skip { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 16px; background: none; border: 0; color: var(--ink-dim);
+    font: inherit; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; padding: 8px; cursor: pointer; opacity: .7; }
+  .done .skip { display: none; }
+
+  /* ---------------- 3D: the 360° loads behind the hero, the hero slides up; on scroll a panel slides over it ---------------- */
+  .has3d .hero { position: fixed; inset: 0; z-index: 5; transition: transform 1.3s cubic-bezier(.7, 0, .2, 1); }
+  .has3d.lift .hero { transform: translate3d(0, -100%, 0); pointer-events: none; }
+  .scene { display: none; position: relative; }
+  .has3d .scene { display: block; }
+  .scene .view { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #fff; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+  .scene .view.drag { cursor: grabbing; }
+  .scene iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
+  .scene.ready iframe { opacity: 1; }
+  .hint { position: absolute; left: 50%; bottom: max(28px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--navy); font-size: 12px; font-weight: 600; letter-spacing: .16em;
+    text-transform: uppercase; opacity: 0; transition: opacity .6s; pointer-events: none; }
+  .hint svg { width: 16px; height: 16px; animation: nudge 1.8s ease-in-out infinite; }
+  .lift .hint.on { opacity: .85; transition-delay: 5s; }
+  .hint.gone { opacity: 0 !important; transition-delay: 0s !important; }
+  /* the panel: a white sheet that scrolls up over the pinned 360°. Two words rise, then – as the page scrolls – a gap
+     opens between them with the brochure renders cross-fading inside; below, a magazine spread */
+  .panel { --purple: #4b2a8f; --purple-dim: rgba(75, 42, 143, .64); --hair: rgba(75, 42, 143, .2);
+    position: relative; z-index: 2; background: #fff; color: var(--purple);
+    border-radius: clamp(20px, 4vw, 44px) clamp(20px, 4vw, 44px) 0 0; box-shadow: 0 -24px 70px rgba(40, 20, 90, .22); }
+  .feel { --p: 0; height: 260vh; height: 260svh; }
+  .feel .pin { position: sticky; top: 0; height: 100vh; height: 100svh; display: grid; place-items: center; overflow: hidden; }
+  .panel .kicker { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--purple-dim); }
+  .feel .kicker { position: absolute; top: clamp(28px, 6vh, 56px); left: 0; right: 0; text-align: center; opacity: 0; transition: opacity .8s .1s; }
+  .duo { --gw: min(34vw, 560px); --gh: min(50vh, 480px); margin: 0; display: flex; align-items: center; justify-content: center;
+    font-weight: 300; font-size: clamp(44px, 7.4vw, 124px); line-height: 1; letter-spacing: -.03em; white-space: nowrap; }
+  .duo .w { display: inline-block; overflow: hidden; padding: .1em .04em .16em; }
+  .duo .w > span { display: inline-block; transform: translate3d(0, 115%, 0); transition: transform 1s var(--ease) calc(var(--i) * 140ms); }
+  .duo .gap ~ .w { font-weight: 700; }
+  .duo .gap { position: relative; flex: none; width: calc(var(--p) * var(--gw)); height: var(--gh); margin: 0 .12em; overflow: hidden;
+    border-radius: clamp(10px, 1.4vw, 20px); background: #efeaf7; }
+  .duo .frame { position: absolute; top: 0; left: 50%; width: var(--gw); height: var(--gh); margin-left: calc(var(--gw) / -2);
+    transform: scale(calc(1.2 - .2 * var(--p))); }
+  .duo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.2s ease; }
+  .duo img.on { opacity: 1; }
+  .feel .cap { position: absolute; bottom: clamp(22px, 5vh, 48px); left: 0; right: 0; margin: 0; text-align: center; font-size: 12px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--purple-dim); opacity: var(--p); }
+  .feel .cap b { font-weight: 700; color: var(--purple); }
+  .feel.leaving .cap { opacity: 0; transition: opacity .3s; }
+  .panel.show .feel .kicker { opacity: 1; }
+  .panel.show .duo .w > span { transform: none; }
+  @media (max-width: 700px), (max-aspect-ratio: 4/5) {                /* phones: the words stack, the gap opens vertically */
+    .duo { --gw: 76vw; --gh: min(38vh, 360px); flex-direction: column; font-size: clamp(56px, 19vw, 128px); }
+    .duo .gap { width: var(--gw); height: calc(var(--p) * var(--gh)); margin: .04em 0; }
+    .duo .frame { top: 50%; margin-top: calc(var(--gh) / -2); }
+  }
+  /* magazine spread: picture on one side, the text set low on the opposite one */
+  .mag { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(12px, 2vw, 28px); align-items: center; align-content: center;
+    min-height: 100vh; min-height: 100svh; max-width: calc(1320px * var(--z, 1)); margin: 0 auto; padding: clamp(32px, 6vh, 72px) clamp(20px, 6vw, 96px); background: #fff; }   /* a screen of its own */
+  /* left: the little térreo in 3D with numbered points; right (.side): the text, or – after a tap – the picture of that place */
+  .mini { margin-top: 72px; grid-column: 1 / span 7; position: relative; aspect-ratio: 4 / 3; align-self: center; border-radius: clamp(12px, 1.6vw, 24px);
+    background: radial-gradient(ellipse 70% 60% at 50% 55%, #f1ecf9, rgba(241, 236, 249, 0) 72%); }
+  .mini canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: pan-y; opacity: 0; transition: opacity 1s ease; }
+  .mini.on canvas { opacity: 1; }
+  .mini canvas, .spots {                                             /* soft edges: the zoomed plan fades out instead of being cut */
+    -webkit-mask: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent), linear-gradient(transparent, #000 8%, #000 90%, transparent);
+    -webkit-mask-composite: source-in; mask: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent), linear-gradient(transparent, #000 8%, #000 90%, transparent);
+    mask-composite: intersect; }
+  .mini canvas:active { cursor: grabbing; }
+  .mini > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+  .mini .floor { position: absolute; left: 0; top: 0; transform: translateY(calc(-100% - 14px)); z-index: 2; margin: 0; display: grid; gap: 4px; pointer-events: none; }
+  .mini .floor b { font-weight: 300; font-size: clamp(30px, 3vw, 44px); line-height: 1; letter-spacing: -.02em; color: var(--purple); }
+  .mini .floor span { font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--purple-dim); }
+  .stack { height: 380vh; height: 380svh; overflow-x: clip; }                        /* the panel stays while the 1º pavimento comes down */
+  .stack > .mag { position: sticky; top: 0; }
+  .stack > .mag > * { zoom: var(--z, 1); }                         /* big screens: plan + text scale up together (--z set in JS) */
+  .mini .floor, .mag .copy > * { transition: opacity .35s ease, transform .5s var(--ease); }
+  .swap .mini .floor, .swap .mag .copy > * { opacity: 0; transform: translate3d(0, 10px, 0); }
+  .spots.moving { opacity: 0 !important; transition: opacity .2s; }
+  .spots.moving .spot { pointer-events: none; }
+  .detail.noimg .ph { display: none; }
+  .mini .tag { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding-top: 10px; border-top: 1px solid var(--hair); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--purple-dim); pointer-events: none; }
+  .spots { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity .8s ease .4s; }
+  .mini.on .spots { opacity: 1; }
+  .spot { position: absolute; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; padding: 0; border: 2px solid #fff; border-radius: 50%; cursor: pointer; pointer-events: auto;
+    background: var(--purple); color: #fff; font: 700 12px/1 Manrope, system-ui, sans-serif; box-shadow: 0 6px 16px rgba(40, 20, 90, .35); transition: background .25s, color .25s, box-shadow .25s; }
+  .spot::before { content: ""; position: absolute; inset: -12px; }                            /* bigger tap area */
+  .spot:hover, .spot:focus-visible { background: #fff; color: var(--purple); border-color: var(--purple); outline: none; }
+  .spot.sel { background: #fff; color: var(--purple); border-color: var(--purple); box-shadow: 0 0 0 4px rgba(75, 42, 143, .25), 0 6px 16px rgba(40, 20, 90, .35); }
+  .mag .side { grid-column: 8 / span 5; display: grid; align-self: center; position: relative; isolation: isolate; }
+  .mag::after, .mag .side::after { content: ""; position: absolute; pointer-events: none; z-index: -1; border-radius: clamp(20px, 2.2vw, 32px);
+    /* clear fluted glass: a soft sheen from the top, wide rounded flutes (shade → highlight → shade), a very pale tint drifting underneath;
+       edge light from inset hairlines, depth from one long faint shadow. */
+    background:
+      radial-gradient(120% 55% at 25% 0%, rgba(255, 255, 255, .75), rgba(255, 255, 255, 0) 60%),
+      linear-gradient(90deg, rgba(40, 30, 80, .016), rgba(255, 255, 255, .42) 40%, rgba(255, 255, 255, .12) 64%, rgba(40, 30, 80, .012)),
+      radial-gradient(60% 45% at 20% 30%, rgba(214, 208, 238, .38), transparent 70%),
+      radial-gradient(55% 45% at 85% 78%, rgba(242, 232, 216, .42), transparent 70%),
+      linear-gradient(160deg, #fafafc, #f5f4f8 50%, #f8f7f5);
+    background-size: 100% 100%, 56px 100%, 170% 170%, 170% 170%, 100% 100%;   /* flutes: wide spacing (user ask) */
+    -webkit-backdrop-filter: blur(30px) saturate(1.6); backdrop-filter: blur(30px) saturate(1.6);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), inset 1px 0 0 rgba(255, 255, 255, .7), inset 0 -1px 0 rgba(255, 255, 255, .5),
+      0 0 0 .5px rgba(30, 20, 70, .08), 0 1px 3px rgba(30, 20, 70, .04), 0 50px 60px -50px rgba(30, 20, 70, .18);
+    animation: glow 30s ease-in-out infinite alternate; }
+  .mag::after { top: clamp(14px, 2.4vh, 28px); bottom: clamp(14px, 2.4vh, 28px); left: var(--glassL, 58%); right: calc(min(0px, (1320px * var(--z, 1) - 100vw) / 2) + clamp(14px, 1.6vw, 28px)); }
+  .mag .side::after { display: none; inset: -22px -14px; border-radius: 20px; }
+  @keyframes glow { from { background-position: 0 0, 0 0, 0% 0%, 100% 100%, 0 0; } to { background-position: 0 0, 0 0, 60% 50%, 30% 20%, 0 0; } }
+  @media (prefers-reduced-motion: reduce) { .mag::after, .mag .side::after { animation: none; } }
+  @media (max-width: 860px) { .mag::after { display: none; } .mag .side::after { display: block; } }
+  .mag .side > * { grid-area: 1 / 1; min-width: 0; }
+  @media (min-width: 861px) { .mag .side { padding-left: clamp(28px, 3vw, 52px); } }       /* text sits inside the glass, not on its edge */
+  .mag .copy { transition: opacity .5s ease, transform .7s var(--ease), visibility 0s; }
+  .side.open .copy { opacity: 0; transform: translate3d(0, -18px, 0); visibility: hidden; pointer-events: none; transition: opacity .35s ease, transform .5s ease, visibility 0s .35s; }
+  .detail { align-self: center; visibility: hidden; pointer-events: none; }
+  .side.open .detail { visibility: visible; pointer-events: auto; }
+  .detail .top { display: flex; align-items: flex-end; gap: 10px; margin-bottom: clamp(14px, 1.6vw, 22px); position: relative; z-index: 1; }
+  .detail .num { font-weight: 300; font-size: clamp(72px, 9vw, 132px); line-height: .8; letter-spacing: -.05em; margin-left: -.06em; }
+  .detail .of { padding-bottom: 1.4em; font-size: 11px; font-weight: 600; letter-spacing: .2em; color: var(--purple-dim); }
+  .detail .x { margin: 0 0 1.2em auto; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--hair); background: #fff; color: var(--purple); font-size: 20px; line-height: 1; cursor: pointer; transition: background .25s, color .25s; }
+  .detail .x:hover, .detail .x:focus-visible, .detail .nav button:hover, .detail .nav button:focus-visible { background: var(--purple); color: #fff; outline: none; }
+  .detail .ph { aspect-ratio: 3 / 2; overflow: hidden; border-radius: clamp(8px, 1vw, 14px); background: #efeaf7; clip-path: inset(0 0 100% 0); transition: clip-path .9s var(--ease); }
+  .detail .ph img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.16); transition: transform 1.4s var(--ease); }
+  .detail h3 { margin: 18px 0 8px; font-weight: 300; font-size: clamp(26px, 2.5vw, 36px); line-height: 1.08; letter-spacing: -.02em; overflow: hidden; }
+  .detail h3 span { display: block; transform: translate3d(0, 110%, 0); transition: transform .8s var(--ease) .12s; }
+  .detail .desc { margin: 0; font-size: clamp(15px, 1.15vw, 17px); line-height: 1.65; color: #3a2470; opacity: 0; transform: translate3d(0, 10px, 0); transition: opacity .6s ease .25s, transform .8s var(--ease) .25s; }
+  .detail .nav { display: flex; align-items: center; gap: 8px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--hair); opacity: 0; transition: opacity .6s ease .35s; }
+  .detail .nav button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--hair); background: #fff; color: var(--purple); font-size: 16px; cursor: pointer; transition: background .25s, color .25s; }
+  .detail .nav a { margin-left: auto; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--purple); text-decoration: none; border-bottom: 1px solid var(--hair); padding-bottom: 3px; }
+  .detail .num, .detail .of { opacity: 0; transition: opacity .5s ease; }
+  .detail.show .num, .detail.show .of { opacity: 1; }
+  .detail.show .ph { clip-path: inset(0); }
+  .detail.show .ph img { transform: none; }
+  .detail.show h3 span { transform: none; }
+  .detail.show .desc { opacity: 1; transform: none; }
+  .detail.show .nav { opacity: 1; }
+  .mag .lead { margin: 14px 0 20px; font-weight: 300; font-size: clamp(28px, 3.4vw, 46px); line-height: 1.08; letter-spacing: -.02em; }
+  .mag .lead b { font-weight: 700; }
+  .mag .body { margin: 0; max-width: 34ch; font-size: clamp(14px, 1vw, 15px); line-height: 1.7; color: #3a2470; }
+  .mag dl { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; margin: 28px 0 0; }
+  .mag dl div { padding: 14px 0; border-top: 1px solid var(--hair); }
+  .mag dt { font-weight: 700; font-size: clamp(20px, 1.9vw, 26px); letter-spacing: -.01em; }
+  .mag dd { margin: 2px 0 0; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--purple-dim); }
+  .mag .rv { opacity: 0; transform: translate3d(0, 28px, 0); transition: opacity .9s ease, transform 1s var(--ease); }
+  .mag .rv.in { opacity: 1; transform: none; }
+  .mag .side.rv { transition-delay: .15s; }
+  @media (max-width: 860px) {
+    .mag { display: block; }
+    .mag .side { margin-top: 36px; }
+    .mini { margin: 72px -8px 0; aspect-ratio: 5 / 4; }
+    .mini .floor { left: 8px; }
+    .spot { width: 26px; height: 26px; margin: -13px 0 0 -13px; font-size: 11px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .duo .w > span, .mag .rv { transform: none; transition: none; opacity: 1; } .feel .kicker { opacity: 1; } }
+
+  /* ---------------- TOURS (the former chooser) ---------------- */
+  /* statement before the plans: pinned; each word fills grey → purple, left to right, as the page scrolls (--p per word, set in JS) */
+  .say { height: 260vh; height: 260svh; background: #fff; position: relative; isolation: isolate; }
+  /* sunset, part 1: when the last word fills, the whole screen fades from white to peach → amber (.sun, set by the word fill).
+     The gradient sits on the last screen of the panel, so its amber bottom meets the top of the cards panel, which carries on amber → rose → navy. */
+  .say::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 1.4s cubic-bezier(.4, 0, .2, 1);
+    background: linear-gradient(180deg, #fbe9d8 0%, #fbe9d8 calc(100% - 120vh), #f6cfae calc(100% - 55vh), #eba680 100%); }   /* the last screen of the panel: peach → amber */
+  .say.sun::before { opacity: 1; }
+  .say-in { position: sticky; top: 0; min-height: 100vh; min-height: 100svh; display: grid; align-content: center; justify-items: start;
+    max-width: min(1500px, 88vw); margin: 0 auto; padding: 0 clamp(20px, 6vw, 96px); box-sizing: border-box; }
+  .say-k { margin: 0 0 clamp(18px, 2.4vw, 36px); font-size: clamp(11px, .8vw, 15px); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--purple-dim); }
+  .say-t { margin: 0; font-weight: 300; font-size: clamp(34px, 5.2vw, 104px); line-height: 1.08; letter-spacing: -.035em; max-width: 17em; color: #c9c5d1; }
+  .say-t b { font-weight: 700; }
+  .say-t .w { --p: 0; color: transparent; -webkit-background-clip: text; background-clip: text;
+    background-image: linear-gradient(90deg, var(--purple) calc(var(--p) * 100%), #cdc9d6 calc(var(--p) * 100%)); }
+  @media (prefers-reduced-motion: reduce) { .say { height: auto; } .say-t .w { --p: 1 !important; } }
+  /* the plans as tall cards. Entrance: each card wipes up out of a mask (staggered) while its photo settles from a zoom.
+     Hover (desktop): the card opens wide, the rest step back. Click: the card takes the row and loads a street-view style
+     visit (tour.html?embed=walk) while the others fold into slim strips with a vertical label; on phones the visit fills the screen. */
+  .units { position: relative; isolation: isolate; height: 175vh; height: 175svh; background: none; }   /* the sunset is on .dusk, shared with the visit button below */
+  /* the cards hold still for a while (extra scroll on .units, the content pinned) so you don't scroll straight past them */
+  .units-pin { position: sticky; top: 0; min-height: 100vh; min-height: 100svh; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center;
+    padding: clamp(24px, 4vh, 56px) clamp(16px, 4vw, 72px); }
+  .units-pin > * { width: 100%; }
+  /* white until the statement's last word fills, then this white layer fades off together with the statement's own (.sun) */
+  .units::before { content: ""; position: absolute; inset: 0; z-index: -1; background: #fff; transition: opacity 1.4s cubic-bezier(.4, 0, .2, 1); pointer-events: none; }
+  .units.sun::before { opacity: 0; }
+  @media (prefers-reduced-motion: reduce) { .units::before, .say::before { transition-duration: .01s; } }
+  .units-k { max-width: 1700px; margin: 0 auto clamp(16px, 2.4vh, 28px); font-size: clamp(11px, .8vw, 14px); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: #fff; }
+  .units-row { display: flex; gap: clamp(8px, .9vw, 16px); height: clamp(380px, 70vh, 820px); max-width: 1700px; margin: 0 auto; }
+  .unit { --ez: cubic-bezier(.2, .8, .2, 1); --r: clamp(14px, 1.4vw, 24px); --d: calc(var(--i) * 120ms);
+    position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; border-radius: var(--r); color: #fff; isolation: isolate;
+    background: #1d1512; box-shadow: 0 30px 60px -40px rgba(60, 25, 20, .5);
+    clip-path: inset(100% 0 0 0 round var(--r)); translate: 0 48px;
+    transition: flex .9s var(--ez), clip-path 1.25s var(--ez) var(--d), translate 1.25s var(--ez) var(--d), filter .6s ease; }
+  .units.in .unit { clip-path: inset(0 0 0 0 round var(--r)); translate: 0 0; }
+  .unit img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transform: scale(1.38); filter: saturate(.85);
+    transition: transform 1.9s var(--ez) var(--d), filter .8s ease; }
+  .units.in .unit img { transform: scale(1.12); }
+  .unit::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(14, 9, 7, 0) 38%, rgba(14, 9, 7, .55) 70%, rgba(14, 9, 7, .86)); transition: opacity .6s; }   /* dark, neutral-warm: matches the sunset */
+  .u-open { position: absolute; inset: 0; z-index: 1; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; border-radius: inherit; }
+  .u-open:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+  .u-txt { position: absolute; left: clamp(16px, 1.6vw, 30px); right: clamp(16px, 1.6vw, 30px); bottom: clamp(18px, 2.2vw, 34px); display: grid; gap: 4px; pointer-events: none;
+    opacity: 0; translate: 0 18px; transition: opacity .8s ease calc(var(--d) + .45s), translate 1s var(--ez) calc(var(--d) + .45s); }
+  .units.in .u-txt { opacity: 1; translate: 0 0; }
+  .u-type { font-size: clamp(10px, .75vw, 13px); font-weight: 600; letter-spacing: .2em; text-transform: uppercase; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .u-m { font-weight: 300; font-size: clamp(30px, 3.2vw, 60px); line-height: 1; letter-spacing: -.03em; white-space: nowrap; }
+  .u-more { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .7s var(--ez), opacity .5s ease; }
+  .u-more > * { overflow: hidden; }
+  .u-desc { font-size: clamp(14px, 1vw, 17px); line-height: 1.5; padding-top: 10px; white-space: nowrap; }
+  .u-go { display: inline-block; justify-self: start; margin-top: 14px; padding: 10px 18px; border-radius: 999px; background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .45);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+  .u-strip { position: absolute; left: 0; right: 0; bottom: 22px; display: grid; justify-items: center; pointer-events: none; opacity: 0; transition: opacity .4s ease; }
+  .u-strip span { writing-mode: vertical-rl; rotate: 180deg; font-size: 15px; font-weight: 600; letter-spacing: .06em; white-space: nowrap; }
+  @media (hover: hover) and (min-width: 861px) {
+    .units-row:not(.open):hover .unit { flex-grow: .7; filter: brightness(.92); }
+    .units-row:not(.open) .unit:hover, .units-row:not(.open) .unit:focus-within { flex-grow: 3.4; filter: none; }
+    .units.in .units-row:not(.open) .unit:hover img { transform: scale(1); filter: saturate(1); transition-delay: 0s; }
+    .units-row:not(.open) .unit:hover .u-more, .units-row:not(.open) .unit:focus-within .u-more { grid-template-rows: 1fr; opacity: 1; transition-delay: .15s; }
+    /* a card opened: it takes the row, the others become strips (click one to switch) */
+    .units-row.open .unit { flex: 0 0 clamp(46px, 4vw, 64px); filter: brightness(.82); }
+    .units-row.open .unit:not(.on):hover { flex-basis: clamp(58px, 5.2vw, 84px); filter: none; }
+    .units-row.open .unit.on { flex: 1 1 0; filter: none; }
+    .units-row.open .unit .u-txt { opacity: 0; transition: opacity .3s ease; }
+    .units-row.open .unit:not(.on) .u-strip { opacity: 1; transition-delay: .35s; }
+    .units-row.open .unit.on .u-open { display: none; }
+  }
+  /* the visit itself (inside the opened card; on phones a full-screen layer on <body>) */
+  .u-walk { position: absolute; inset: 0; z-index: 2; color: #fff; font-family: Manrope, system-ui, sans-serif; }
+  /* street-view viewer (home/pano.js): a CSS 3D cube of six baked photos per point, arrows lying on the floor */
+  .pv { position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; background: #1a1220; opacity: 0; transition: opacity .3s ease; }   /* quick, so the opening drop (pano.js) is seen from its start */
+  .u-walk.ready .pv { opacity: 1; }
+  .pv.drag { cursor: grabbing; }
+  .pv-cam { position: absolute; left: 50%; top: 50%; transform-style: preserve-3d; }
+  .pv-cube { position: absolute; transform-style: preserve-3d; transition: transform .75s cubic-bezier(.3, .6, .2, 1), opacity .75s ease; }
+  .pv-face { position: absolute; left: 0; top: 0; max-width: none; backface-visibility: hidden; pointer-events: none; }
+  .pv-arrow { position: absolute; left: -34px; top: -34px; width: 68px; height: 68px; padding: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+    color: #fff; background: rgba(20, 14, 30, .32); border: 2px solid rgba(255, 255, 255, .9); box-shadow: 0 0 0 1px rgba(0, 0, 0, .15); transition: background .2s, color .2s; }
+  .pv-arrow:hover, .pv-arrow:focus-visible { background: #fff; color: #4b2a8f; outline: none; }
+  .pv-arrow svg { width: 36px; height: 36px; margin-top: -5px; }
+  .pv-arrow span { position: absolute; top: 100%; left: 50%; translate: -50% 0; margin-top: 8px; padding: 3px 9px; border-radius: 999px; background: rgba(20, 14, 30, .55);
+    font: 600 14px/1.2 Manrope, system-ui, sans-serif; white-space: nowrap; color: #fff; pointer-events: none; }
+  .pv-rooms { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 3px; padding: 0 10px; overflow-x: auto; scrollbar-width: none; }
+  .pv-rooms::-webkit-scrollbar { display: none; }
+  .pv-rooms button { flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .22); color: #fff; font: 600 11.5px/1 Manrope, system-ui, sans-serif; letter-spacing: .02em; cursor: pointer;
+    background: rgba(22, 14, 30, .42); -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3); transition: background .2s, color .2s; }
+  .pv-rooms button:hover { background: rgba(255, 255, 255, .26); }
+  .pv-rooms button.on { background: #fff; color: #4b2a8f; border-color: #fff; }
+  @media (max-width: 860px) { .pv-rooms { justify-content: flex-start; }
+    .u-bar { flex-wrap: wrap; } .u-chip-note { order: 9; max-width: 100%; white-space: normal; } .u-alt { order: 10; } }   /* the 93 m² plan switch under the note */   /* phones: the personalized-plan note on its own line */
+  /* line plan (pano.js planMap): bottom-right, above the room buttons */
+  .pv-map { position: absolute; right: 12px; bottom: 50px; padding: 9px; border-radius: 14px; pointer-events: auto; cursor: default;
+    background: rgba(22, 14, 30, .42); border: 1px solid rgba(255, 255, 255, .24); -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3); }
+  .pv-map svg { display: block; height: clamp(90px, 19vh, 160px); width: auto; max-width: clamp(120px, 16vw, 230px); overflow: visible; }   /* sized by height: tall studio and wide 93 m² plans both stay compact */
+  .pv-map-walls { fill: rgba(255, 255, 255, .92); }
+  .pv-map-glass { fill: rgba(190, 220, 255, .75); }
+  .pv-map-cone { fill: rgba(255, 255, 255, .22); stroke: rgba(255, 255, 255, .5); stroke-width: .04; }
+  .pv-map-pt { cursor: pointer; }
+  .pv-map-pt .hit { fill: transparent; }
+  .pv-map-pt .dot { fill: rgba(255, 255, 255, .55); stroke: rgba(22, 14, 30, .6); stroke-width: .06; transition: fill .2s; }
+  .pv-map-pt:hover .dot { fill: #fff; }
+  .pv-map-pt.on .dot { fill: #eaa982; stroke: #fff; stroke-width: .08; }
+  @media (max-width: 860px) { .pv-map { padding: 6px; bottom: auto; top: 62px; right: 10px; } .pv-map svg { height: 84px; max-width: 120px; } }
+  .u-load { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 16px; font-size: 11px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase;
+    background: rgba(24, 14, 30, .38); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); transition: opacity .7s ease; }
+  .u-walk.ready .u-load { opacity: 0; pointer-events: none; }
+  .u-spin { width: 34px; height: 34px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .28); border-top-color: #fff; animation: uspin .9s linear infinite; }
+  @keyframes uspin { to { rotate: 360deg; } }
+  .u-bar { position: absolute; left: 10px; right: 10px; top: 10px; display: flex; align-items: center; gap: 6px; pointer-events: none; }
+  .u-chip, .u-btn, .u-hint { background: rgba(22, 14, 30, .42); -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3); border: 1px solid rgba(255, 255, 255, .24); }
+  .u-chip { padding: 7px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 600; letter-spacing: .02em; white-space: nowrap; }
+  .u-chip-note { font-weight: 400; font-size: 11.5px; background: rgba(234, 169, 130, .38); border-color: rgba(255, 220, 190, .5); overflow: hidden; text-overflow: ellipsis; min-width: 0; }   /* personalized plan */
+  .u-dn { display: grid; padding-top: 10px; } .u-dn .u-desc { padding-top: 0; }   /* desc + note share the first (collapsing) row: a row of its own lifted the 93 m² title */
+  .u-note { padding-top: 8px; font-size: 12px; line-height: 1.4; opacity: .85; font-style: italic; white-space: normal; }
+  .u-btn { pointer-events: auto; width: 38px; height: 38px; border-radius: 50%; color: #fff; font: 400 17px/1 Manrope, system-ui, sans-serif; cursor: pointer; transition: background .25s; }
+  .u-btn:hover, .u-btn:focus-visible { background: rgba(255, 255, 255, .28); outline: none; }
+  .u-bar [data-a=fs] { margin-left: auto; }
+  .u-hint { position: absolute; left: 50%; top: 62px; translate: -50% 0; margin: 0; padding: 7px 14px; border-radius: 999px; font-size: 12px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .7s ease; }
+  .u-walk.ready .u-hint { opacity: 1; transition-delay: .6s; }
+  .u-modal.full .u-hint { top: auto; bottom: 52px; }   /* phones: the top bar wraps; the hint goes above the room buttons (the floor arrows sit higher) */
+  .u-walk.ready.used .u-hint { opacity: 0; transition-delay: 0s; }
+  /* the visit opens in a modal: it grows out of the clicked card (clip-path, no stretching) over a blurred backdrop */
+  .u-modal { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: rgba(14, 10, 24, .6);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); animation: uFade .45s ease; transition: opacity .35s ease; }
+  .u-modal.closing { opacity: 0; }
+  @keyframes uFade { from { opacity: 0; } }
+  .u-modal .u-walk { position: relative; inset: auto; width: min(94vw, 1600px); height: min(88vh, 960px); border-radius: 22px; overflow: hidden;
+    background: #1a1220 center / cover no-repeat; box-shadow: 0 30px 90px rgba(0, 0, 0, .45); }
+  .u-modal.full .u-walk { width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; box-shadow: none; }
+  .u-plans { display: flex; gap: 4px; margin-left: auto; padding: 4px; border-radius: 999px; pointer-events: auto;
+    background: rgba(22, 14, 30, .42); -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3); border: 1px solid rgba(255, 255, 255, .24); }
+  .u-plans button { padding: 6px 12px; border-radius: 999px; border: 0; background: none; color: #fff; font: 600 12.5px/1 Manrope, system-ui, sans-serif; cursor: pointer; transition: background .2s, color .2s; }
+  .u-plans button:hover { background: rgba(255, 255, 255, .2); }
+  .u-plans button.on { background: #fff; color: #4b2a8f; }
+  .u-bar .u-plans ~ .u-talk { margin-left: 8px; }
+  .u-talk { pointer-events: auto; height: 38px; padding: 0 16px; border-radius: 999px; border: 0; background: #25d366; color: #fff; font: 700 13px/1 Manrope, system-ui, sans-serif; cursor: pointer; white-space: nowrap; box-shadow: 0 8px 20px -10px rgba(0, 0, 0, .5); transition: background .2s; }
+  .u-talk:hover, .u-talk:focus-visible { background: #1ebe5b; outline: none; }
+  .u-bar .u-talk + [data-a=fs] { margin-left: 6px; }
+  .u-modal.full .u-talk { height: 34px; padding: 0 11px; font-size: 12px; }   /* phones: the whole top row fits */
+  .u-modal.full .u-bar .u-btn { width: 34px; height: 34px; font-size: 15px; }
+  /* 93 m²: switch between the personalized plan and the original one with 3 dorms */
+  .u-alt { pointer-events: auto; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .9); background: #fff; color: #4b2a8f; font: 700 12.5px/1 Manrope, system-ui, sans-serif; white-space: nowrap; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); transition: background .2s, color .2s; }
+  .u-alt:hover, .u-alt:focus-visible { background: #4b2a8f; color: #fff; outline: none; }
+  .u-modal.full .u-plans { display: none; }   /* phones: no room for it - close and swipe to another card */
+  html.walking, html.walking body { overflow: hidden; }
+  @media (hover: none), (max-width: 860px) {                       /* touch / narrow: a row you swipe, every card already open */
+    .units { height: 160vh; height: 160svh; }
+    .units-pin { padding-top: clamp(20px, 4vh, 40px); padding-bottom: clamp(20px, 4vh, 40px); }
+    .units-row { overflow-x: auto; scroll-snap-type: x mandatory; height: auto; padding-bottom: 8px; scrollbar-width: none;
+      margin: 0 calc(-1 * clamp(16px, 4vw, 72px)); padding-inline: clamp(16px, 4vw, 72px); scroll-padding-inline: clamp(16px, 4vw, 72px); }   /* swipe edge to edge */
+    .units-row::-webkit-scrollbar { display: none; }
+    .unit { flex: 0 0 min(78vw, 420px); height: clamp(380px, 62vh, 560px); scroll-snap-align: center; }
+    .units.in .unit img { transform: scale(1.02); }
+    .u-more { grid-template-rows: 1fr; opacity: 1; }
+    .u-desc { white-space: normal; }
+  }
+  @media (prefers-reduced-motion: reduce) { .unit, .u-txt, .unit img { clip-path: none !important; translate: none !important; opacity: 1 !important; transition: none !important; } }
+  /* sunset, part 2: ONE gradient behind the cards and the visit button, amber (where the statement panel ends) → warm rose, at an even pace */
+  /* the fine grain on top dithers the long, slow gradient so it shows no 8-bit bands (they read as lines) */
+  .dusk { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 180px 180px, linear-gradient(180deg, #eba680 0%, #e79a71 45%, #e28d63 80%, #df865b 100%); }   /* sunset orange (was dusky pink) */
+  /* after the plan cards: the way into the building visit (visita/) – one screen, Framer-style: the line and the button in the
+     middle, a loose collage of the leisure renders around it. The cards rise in one after another, float on their own rhythm,
+     drift with the mouse and the scroll at different depths (--d), lift and name the place on hover, and open the visit AT that
+     place (visita/#id). A soft light follows the cursor; the button leans towards it. */
+  .vcta { --mx: 0; --my: 0; --sy: 0; position: relative; min-height: 100vh; min-height: 100svh; overflow: hidden; display: grid; place-items: center;
+    padding: clamp(60px, 10vh, 120px) clamp(16px, 5vw, 80px); text-align: center; color: #fff; isolation: isolate; }
+  .vc-glow { position: absolute; z-index: -1; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1s;
+    background: radial-gradient(38vmax 38vmax at calc(50% + var(--mx) * 50%) calc(50% + var(--my) * 50%), rgba(255, 226, 196, .32), transparent 70%); }
+  .vcta:hover .vc-glow { opacity: 1; }
+  .vc-cards { position: absolute; inset: 0; pointer-events: none; }
+  .vc-card { position: absolute; left: 0; top: 0; width: clamp(150px, 13vw, 230px); aspect-ratio: 4 / 3; pointer-events: auto; display: block; color: #fff; text-decoration: none;
+    will-change: transform; opacity: 0; scale: .82; filter: blur(10px); transition: opacity .9s ease calc(var(--i) * 90ms), scale 1.1s var(--ease) calc(var(--i) * 90ms), filter .9s ease calc(var(--i) * 90ms); }
+  .vcta.in .vc-card { opacity: 1; scale: 1; filter: none; }
+  .vc-in { position: absolute; inset: 0; display: block; border-radius: clamp(12px, 1.3vw, 22px); overflow: hidden; background: #8a5560;
+    box-shadow: 0 24px 50px -24px rgba(70, 20, 30, .55), 0 0 0 1px rgba(255, 255, 255, .14);
+    animation: vcFloat calc(6s + var(--d) * 3s) ease-in-out calc(var(--i) * -.7s) infinite alternate; transition: transform .5s var(--ease), box-shadow .5s; }
+  .vc-in img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.06); transition: transform .8s var(--ease), filter .5s; filter: saturate(.92); }
+  .vc-lab { position: absolute; left: 10px; bottom: 10px; padding: 6px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .02em;
+    background: rgba(255, 255, 255, .92); color: #5a2c35; opacity: 0; translate: 0 6px; transition: opacity .35s, translate .45s var(--ease); white-space: nowrap; }
+  .vc-lab b { font-weight: 700; }
+  .vc-card:hover .vc-in, .vc-card:focus-visible .vc-in { transform: translateY(-8px) scale(1.04); box-shadow: 0 36px 60px -24px rgba(70, 20, 30, .65), 0 0 0 2px rgba(255, 255, 255, .7); animation-play-state: paused; }
+  .vc-card:hover img, .vc-card:focus-visible img { transform: scale(1.12); filter: none; }
+  .vc-card:hover .vc-lab, .vc-card:focus-visible .vc-lab { opacity: 1; translate: 0 0; }
+  .vc-card:focus-visible { outline: none; }
+  @keyframes vcFloat { from { transform: translateY(-6px); } to { transform: translateY(6px); } }
+  .vcta-in { position: relative; z-index: 2; max-width: 820px; display: grid; justify-items: center; gap: clamp(14px, 2.4vh, 24px); }
+  .vcta-k { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: rgba(255, 255, 255, .85); }
+  .vcta-t { margin: 0; font-weight: 300; font-size: clamp(34px, 4.6vw, 80px); line-height: 1.04; letter-spacing: -.03em; text-shadow: 0 2px 30px rgba(110, 40, 50, .35); }
+  .vcta-t b { font-weight: 700; }
+  .vcta-b { --bx: 0px; --by: 0px; display: inline-flex; align-items: center; gap: 12px; margin-top: 6px; padding: 18px 30px; border-radius: 999px; background: #fff; color: #5a2c35; text-decoration: none;
+    font-weight: 700; font-size: clamp(15px, 1.1vw, 17px); letter-spacing: .02em; box-shadow: 0 20px 40px -18px rgba(90, 30, 40, .55);
+    translate: var(--bx) var(--by); transition: background .25s, color .25s, translate .35s var(--ease); }
+  .vcta-b span { transition: transform .4s var(--ease); }
+  .vcta-b:hover, .vcta-b:focus-visible { background: #2a1820; color: #fff; outline: none; }
+  .vcta-b:hover span { transform: translateX(5px); }
+  .vcta-n { margin: 0; font-size: 13px; color: rgba(255, 255, 255, .78); }
+  @media (max-width: 860px) {                                        /* phones: six cards in a band above and below the text */
+    .vc-wide { display: none; }
+    .vc-card { width: 32vw; }
+    .vc-lab { opacity: 1; translate: 0 0; font-size: 11px; padding: 5px 9px; left: 6px; bottom: 6px; }   /* no hover on touch: always named */
+    .vcta { min-height: 110svh; }
+  }
+  @media (prefers-reduced-motion: reduce) { .vc-card { transition: none; } .vc-in { animation: none; } .vcta-b { translate: none; } }
+  /* plan cards (desktop): hovering an apartment shows its floor plan in a small card that follows the cursor */
+  .u-plan { position: fixed; z-index: 60; left: 0; top: 0; width: 220px; padding: 8px 8px 9px; border-radius: 16px; background: #fff; pointer-events: none;
+    box-shadow: 0 24px 50px -18px rgba(40, 15, 10, .45), 0 0 0 1px rgba(0, 0, 0, .05); opacity: 0; scale: .9; transform-origin: 0 0;
+    transition: opacity .25s ease, scale .35s var(--ease); will-change: transform; }
+  .u-plan.on { opacity: 1; scale: 1; }
+  .u-plan img { display: block; width: 100%; height: 190px; object-fit: contain; border-radius: 10px; background: #f4f1ec; }
+  .u-plan span { display: block; margin: 7px 2px 0; font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #7a5a50; }
+  .u-plan b { color: #3a2420; letter-spacing: .04em; }
+  @media (hover: none), (max-width: 860px) { .u-plan { display: none; } }
+  /* floating WhatsApp, bottom-right on every screen; hides over the contact panel and while a tour is open */
+  .wa-fab { position: fixed; z-index: 70; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); display: inline-flex; align-items: center; gap: 0;
+    height: 58px; padding: 0 15px; border-radius: 999px; background: #25d366; color: #fff; text-decoration: none; font: 700 15px/1 Manrope, system-ui, sans-serif;
+    box-shadow: 0 14px 30px -10px rgba(10, 60, 30, .55), 0 0 0 1px rgba(255, 255, 255, .25) inset; transition: opacity .35s, translate .5s var(--ease), gap .35s var(--ease), background .2s; }
+  .wa-fab svg { width: 28px; height: 28px; flex: none; }
+  .wa-fab span { max-width: 0; overflow: hidden; white-space: nowrap; transition: max-width .4s var(--ease); }
+  .wa-fab:hover, .wa-fab:focus-visible { background: #1ebe5b; gap: 10px; outline: none; }
+  .wa-fab:hover span, .wa-fab:focus-visible span { max-width: 110px; }
+  .wa-fab.off { opacity: 0; translate: 0 24px; pointer-events: none; }
+  html.walking .wa-fab { opacity: 0; pointer-events: none; }
+  @media (max-width: 700px) { .wa-fab { height: 54px; padding: 0 13px; } }
+  /* legal tags (brochure wording): "Perspectiva ilustrativa" on the 3D views and tours, "Planta ilustrativa" on the plans */
+  .ill-tag { position: absolute; z-index: 3; margin: 0; padding: 4px 9px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(255, 255, 255, .88); background: rgba(20, 14, 30, .34); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); pointer-events: none; white-space: nowrap; }
+  .ill-hero { left: 16px; bottom: max(16px, env(safe-area-inset-bottom)); }
+  .ill-mini { right: 0; top: 0; translate: 0 calc(-100% - 14px); color: var(--purple-dim); background: none; padding: 4px 0; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .u-ill { left: 12px; bottom: 12px; }
+  .u-modal.full .u-ill { bottom: auto; top: 108px; }
+  /* contact: a small blue pill appears at the bottom of the screen and grows to fill it as you scroll (clip-path from --p, set in
+     JS); once full, the corretor: text, e-mail to copy, WhatsApp – his photo on the right. Then the footer: tour links, giant logo. */
+  .contact { --p: 0; --q: 0; --ti: 100vh; --si: 40vw; --bi: 0px; --rr: 30px; position: relative; height: 300vh; height: 300svh; background: #df865b; z-index: 3; }   /* above .panel (z 2) and its soft shadow */
+  .ct-pin { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #df865b; }   /* = the end of .dusk: no seam */
+  .ct-pin > .vcta { position: absolute; inset: 0; min-height: 0; }   /* the visit panel IS the first view of this scene; the blue grows over it */
+  .ct-blue { position: absolute; inset: -1px; color: #fff;
+    background:
+      linear-gradient(180deg, rgba(21, 28, 58, 0) 72%, #151c3a 100%),   /* on top of everything (grain too): the bottom edge melts into the footer */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 180px 180px,
+      radial-gradient(60% 55% at 85% 12%, rgba(52, 170, 214, .45), transparent 70%),
+      radial-gradient(50% 50% at 8% 90%, rgba(70, 90, 210, .35), transparent 70%),
+      linear-gradient(165deg, #1f3f86 0%, #1a2d66 50%, #151c3a 100%);
+    clip-path: inset(var(--ti) var(--si) var(--bi) round var(--rr)); will-change: clip-path; z-index: 4; }   /* the pill rises from below the screen, then grows (JS) */
+  /* glass + content grow with the panel: scaled up from small and kept centred in the blue that is already visible (--cs, --cy from JS) */
+  .ct-stage { position: absolute; inset: 0; display: grid; place-items: center; padding: clamp(24px, 6vh, 64px) clamp(16px, 6vw, 100px);
+    transform: translate3d(0, var(--cy, 0px), 0) scale(var(--cs, 1)); transform-origin: 50% 50%; will-change: transform; }
+  .ct-grid { position: relative; z-index: 1; width: 100%; max-width: 1240px; display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: clamp(24px, 5vw, 80px);
+    opacity: var(--q); visibility: hidden; }
+  .contact.full .ct-grid { visibility: visible; }
+  .ct-k { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: rgba(160, 215, 255, .9); }
+  .ct-t { margin: 14px 0 14px; font-weight: 300; font-size: clamp(40px, 5.6vw, 96px); line-height: 1; letter-spacing: -.035em; }
+  .ct-t b { font-weight: 700; }
+  .ct-p { margin: 0 0 clamp(20px, 3.4vh, 34px); max-width: 34ch; font-size: clamp(15px, 1.15vw, 18px); line-height: 1.6; color: rgba(255, 255, 255, .84); }
+  .ct-mail { display: flex; align-items: center; gap: 14px; max-width: 100%; }   /* no pill: the address (opens the e-mail app) + the copy icon */
+  .ct-ml { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(19px, 1.75vw, 28px); font-weight: 600; letter-spacing: -.01em; color: #fff;
+    text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, .35); padding-bottom: 2px; transition: border-color .2s, color .2s; }
+  .ct-ml:hover, .ct-ml:focus-visible { color: #a8dcff; border-color: #a8dcff; outline: none; }
+  .ct-mail button { flex: none; width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .1); color: #fff; cursor: pointer; transition: background .2s, color .2s, transform .3s var(--ease); }
+  .ct-mail button svg { width: 21px; height: 21px; }
+  .ct-mail button:active { transform: scale(.92); }
+  .ct-mail button:hover, .ct-mail button:focus-visible { background: #fff; color: #1a2d66; outline: none; }
+  .ct-mail button.ok { background: #5fd6b4; color: #0d2a22; }
+  .ct-wa { display: inline-flex; align-items: center; gap: 14px; margin-top: 14px; padding: 14px 26px 14px 18px; border-radius: 999px; background: #25d366; color: #0b2e1a; text-decoration: none;
+    box-shadow: 0 18px 40px -18px rgba(0, 0, 0, .55); transition: transform .35s var(--ease), background .2s; }
+  .ct-wa:hover, .ct-wa:focus-visible { background: #3ee07d; transform: translateY(-2px); outline: none; }
+  .ct-wa svg { width: 30px; height: 30px; flex: none; }
+  .ct-wa span { display: grid; gap: 2px; text-align: left; }
+  .ct-wa b { font-size: 16px; } .ct-wa small { font-size: 13px; font-weight: 600; opacity: .8; }
+  .ct-ph { position: relative; z-index: 1; margin: 0; justify-self: end; width: min(100%, 460px); aspect-ratio: 3 / 4; max-height: 76vh; border-radius: clamp(18px, 2vw, 30px);
+    box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .7); }
+  /* fluted glass, the site's identity (same as beside the 3D plans): wide rounded flutes, a sheen from the top, a bright edge on its left;
+     it blurs the blue behind it and runs from just left of the photo (--gl, measured in JS) to the screen's right edge, top to bottom */
+  .ct-glass { position: absolute; z-index: 0; top: clamp(14px, 2.4vh, 28px); bottom: clamp(14px, 2.4vh, 28px); right: clamp(14px, 1.6vw, 28px); left: var(--gl, 58%);
+    border-radius: clamp(20px, 2.2vw, 32px); pointer-events: none; opacity: var(--q);
+    background:
+      radial-gradient(120% 50% at 30% 0%, rgba(255, 255, 255, .42), rgba(255, 255, 255, 0) 62%),
+      linear-gradient(90deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .34) 40%, rgba(255, 255, 255, .14) 64%, rgba(255, 255, 255, .05)),
+      linear-gradient(180deg, rgba(225, 238, 255, .30), rgba(225, 238, 255, .20));   /* a light, milky glass */
+    background-size: 100% 100%, 56px 100%, 100% 100%;
+    -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 1px 0 0 rgba(255, 255, 255, .35), inset 0 0 0 1px rgba(255, 255, 255, .12), 0 30px 60px -40px rgba(0, 0, 0, .5); }
+  .ct-ph picture { display: block; width: 100%; height: 100%; border-radius: inherit; overflow: hidden; }
+  .ct-ph img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; transform: scale(calc(1.08 - var(--q) * .08)); }
+  @media (max-width: 860px) {
+    .ct-grid { grid-template-columns: 1fr; gap: 18px; }
+    .ct-ph { order: -1; justify-self: center; width: min(62vw, 300px); aspect-ratio: 4 / 5; max-height: 34svh; }
+    .ct-glass { left: 12px; right: 12px; top: 12px; bottom: auto; height: var(--gh, 50%); border-radius: 22px; }
+    .ct-t { font-size: clamp(34px, 10vw, 52px); margin: 8px 0; } .ct-p { margin-bottom: 16px; font-size: 14px; }
+    .ct-ml { font-size: 16px; } .ct-mail { gap: 10px; } .ct-mail button { width: 40px; height: 40px; }
+    .ct-wa { padding: 12px 20px 12px 14px; } .ct-wa b { font-size: 15px; }
+    .contact { --phone: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ct-stage { transform: none; position: relative; min-height: 100svh; } .contact { height: auto; } .ct-pin { position: relative; height: auto; min-height: 100svh; } .ct-pin > .vcta { position: relative; min-height: 100svh; } .ct-blue { position: relative; min-height: 100svh; clip-path: none; } .ct-grid { opacity: 1; translate: none; visibility: visible; } }
+  /* footer: tour links, then the Platinum logo across the whole width, the legal line */
+  .foot { position: relative; overflow: hidden; padding: clamp(48px, 9vh, 96px) clamp(16px, 4vw, 64px) clamp(18px, 3vh, 30px); background: linear-gradient(180deg, #151c3a, #0e1430); color: #fff; }
+  .foot-in { max-width: 1240px; margin: 0 auto clamp(40px, 8vh, 90px); }
+  .foot-k { margin: 0 0 18px; font-size: 13px; color: var(--ink-dim); } .foot-k a { color: #fff; }
+  .foot ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .foot li a { display: block; padding: 16px; border-radius: 14px; color: inherit; text-decoration: none; font-size: 18px; font-weight: 700; background: rgba(255, 255, 255, .05);
+    border: 1px solid var(--line); transition: transform .3s var(--ease), background .3s, border-color .3s; }
+  .foot li a span { display: block; margin-top: 4px; font-size: 12.5px; font-weight: 400; color: var(--ink-dim); }
+  .foot li a:hover, .foot li a:focus-visible { transform: translateY(-3px); background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .35); outline: none; }
+  .foot-logo { display: block; width: 100%; height: auto; margin: 0 auto; opacity: .96; }
+  .foot-legal { max-width: 1240px; margin: clamp(18px, 3vh, 30px) auto 0; font-size: 11.5px; line-height: 1.6; color: rgba(226, 236, 255, .55); text-align: center; }
+  .foot-legal a { color: inherit; }
+
+  /* skip / reduced motion: jump straight to the final frame */
+  .instant *, .instant *::before, .instant *::after { animation-delay: 0s !important; animation-duration: 0s !important; }
+  @media (prefers-reduced-motion: reduce) {
+    .hero *, .hero *::before, .hero *::after { animation-delay: 0s !important; animation-duration: 0s !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</head>
+<body class="locked">
+<header class="hero" id="top">
+  <div class="stage" id="stage">
+  <div class="bg" aria-hidden="true"></div>
+  <div class="panes" id="panes" aria-hidden="true"></div>
+  <div class="shade" aria-hidden="true"></div>
+
+  <div class="brand">
+    <svg class="logo" viewBox="886 -826 145 143" role="img" aria-labelledby="logoTitle">
+      <title id="logoTitle">Platinum Tatuapé</title>
+      <defs>
+        <linearGradient id="silver" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ffffff" />
+          <stop offset=".35" stop-color="#d9dde3" />
+          <stop offset=".5" stop-color="#ffffff">
+            <animate attributeName="offset" values=".05;.95;.95" keyTimes="0;.45;1" dur="5s" begin="4s" repeatCount="indefinite" />
+          </stop>
+          <stop offset=".7" stop-color="#c2c7cf" />
+          <stop offset="1" stop-color="#eef0f3" />
+        </linearGradient>
+      </defs>
+      <g class="spin" fill="url(#silver)">
+        <path class="petal" style="--d:.9s;--tx:-26px;--ty:22px;--ox:100%;--oy:0%" d="M899.7-725.5c-4.2-4.2-4.2-11.1,0-15.3l29.9-29.9l15.3,15.3l-29.9,29.9c-2.1,2.1-4.9,3.2-7.7,3.2 C904.6-722.3,901.8-723.3,899.7-725.5 M913.2-787.1l14.3,14.3l-29.9,29.9c-5.4,5.4-5.4,14.2,0,19.6c5.4,5.4,14.2,5.4,19.6,0 l29.7-29.7v-4.7L929.7-775l-14.3-14.3L913.2-787.1z" />
+        <path class="petal" style="--d:1.05s;--tx:-22px;--ty:-26px;--ox:100%;--oy:100%" d="M933.8-820.1c-2.7,0.5-5.3,1.8-7.5,3.9c-5.4,5.4-5.4,14.2,0,19.6l20.6,20.6v-0.4h3.9l-22.3-22.3 c-4.2-4.2-4.2-11.1,0-15.3c4.2-4.2,11.1-4.2,15.3,0l29.9,29.9l-8.5,8.5c1.1,0.3,2.1,0.7,3.1,1.2l9.7-9.7l14.3-14.3l-2.1-2.1 l-14.3,14.3L946-816.2c-2.1-2.1-4.7-3.4-7.5-3.9H933.8z" />
+        <path class="petal" style="--d:1.2s;--tx:26px;--ty:-22px;--ox:0%;--oy:100%" d="M999.8-787.3l-21.9,21.9c0.5,0.9,1,1.9,1.3,3l22.7-22.7c4.2-4.2,11.1-4.2,15.3,0c4.2,4.2,4.2,11.1,0,15.3 l-29.9,29.9l-8.1-8.1c-0.4,1-0.8,2-1.3,2.9l9.5,9.5l14.3,14.3l2.1-2.1l-14.3-14.3l29.9-29.9c5.4-5.4,5.4-14.2,0-19.6 c-2.7-2.7-6.3-4.1-9.8-4.1C1006.1-791.4,1002.5-790,999.8-787.3" />
+        <path class="petal" style="--d:1.35s;--tx:22px;--ty:26px;--ox:0%;--oy:0%" d="M965.3-735l23.2,23.2c4.2,4.2,4.2,11.1,0,15.3c-4.2,4.2-11.1,4.2-15.3,0l-29.9-29.9l7.7-7.7h-4v-0.2l-8,8 l-14.3,14.3l2.1,2.1l14.3-14.3l29.9,29.9c5.4,5.4,14.2,5.4,19.6,0c5.4-5.4,5.4-14.2,0-19.6l-22.2-22.2 C967.4-735.8,966.4-735.4,965.3-735" />
+      </g>
+      <path class="ring" d="M950.1-772.3v4.2h9.9c6.9,0,12.6,5.6,12.6,12.6c0,6.9-5.6,12.6-12.6,12.6h-9.9v4.2h9.9 c9.2,0,16.7-7.5,16.7-16.7c0-9.2-7.5-16.7-16.7-16.7H950.1z" />
+      <path class="core" fill="url(#silver)" d="M956.3-764.5h-2.5h-3.7v17.8h9.9c4.9,0,8.9-4,8.9-8.9c0-4.9-4-8.9-8.9-8.9H956.3z" />
+    </svg>
+    <h1 class="word"><span class="vh">Platinum – Tatuapé by Diálogo</span></h1>
+  </div>
+
+  <button class="skip" id="skip" type="button">Pular</button>
+  <a class="cta" href="#units">Explorar
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+  </a>
+  </div>
+</header>
+
+<section class="scene" id="scene" aria-label="Platinum Tatuapé em 3D">
+  <div class="view">
+    <iframe id="three" title="Platinum em 3D – vista 360°" tabindex="-1" aria-hidden="true"></iframe>
+    <p class="ill-tag ill-hero">Perspectiva ilustrativa</p>
+    <div class="hint on" id="hint">Arraste para girar · role para continuar
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+    </div>
+  </div>
+  <div class="panel" id="panel">
+    <div class="feel" id="feel">
+      <div class="pin">
+        <p class="kicker">Platinum Tatuapé by Diálogo</p>
+        <h2 class="duo" aria-label="Luxo sereno">
+          <span class="w" aria-hidden="true"><span style="--i:0">Luxo</span></span>
+          <span class="gap" aria-hidden="true"><span class="frame" id="frame">
+            <img class="on" alt="" decoding="async" data-src="home/feel/fachada.jpg" data-cap="Fachada" style="object-position:50% 38%" />
+            <img alt="" decoding="async" data-src="home/feel/piscina.jpg" data-cap="Piscina adulto" />
+            <img alt="" decoding="async" data-src="home/feel/lobby.jpg" data-cap="Lobby" style="object-position:62% 50%" />
+            <img alt="" decoding="async" data-src="home/feel/terraco.jpg" data-cap="Terraço do apto. 93 m²" style="object-position:70% 50%" />
+            <img alt="" decoding="async" data-src="home/feel/living.jpg" data-cap="Living do apto. 93 m²" />
+          </span></span>
+          <span class="w" aria-hidden="true"><span style="--i:1">sereno</span></span>
+        </h2>
+        <p class="cap" aria-hidden="true">Perspectiva ilustrada · <b id="capName">Fachada</b></p>
+      </div>
+    </div>
+    <section class="stack" id="stack"><div class="mag" id="mag">
+      <div class="mini rv" id="mini">
+        <canvas id="miniC" role="img" aria-label="Maquete 3D do térreo e do 1º pavimento do Platinum"></canvas>
+        <div class="spots" id="spots"></div>
+        <p class="floor" id="floor"><b id="fTitle">Térreo</b><span id="fSub">Implantação · lazer e estacionamento</span></p>
+        <p class="tag" id="tag">Arraste para girar · toque nos pontos · role para subir</p>
+        <p class="ill-tag ill-mini">Planta ilustrativa</p>
+      </div>
+      <div class="side rv" id="side">
+      <div class="copy" id="copy">
+        <p class="kicker" id="cKicker">Por dentro do térreo</p>
+        <p class="lead" id="cLead">Chegar em casa<br /><b>já é lazer.</b></p>
+        <p class="body" id="cBody">Pela Praça Heitor Levi você entra no lobby de pé-direito duplo. Ao redor, coworking, casa de campo com spa, churrasqueira, pet place e quadra, cercados de jardim.</p>
+        <dl id="cFacts">
+          <div><dt>2 lobbies</dt><dd>social e estacionamento</dd></div>
+          <div><dt>8 espaços</dt><dd>de lazer no térreo</dd></div>
+          <div><dt>Pé-direito</dt><dd>duplo no lobby</dd></div>
+          <div><dt>Acessos</dt><dd>pela Praça Heitor Levi</dd></div>
+        </dl>
+      </div>
+      <article class="detail" id="detail" aria-live="polite">
+        <div class="top"><span class="num" id="dNum">01</span><button class="x" id="dClose" type="button" aria-label="Fechar e voltar ao texto">×</button></div>
+        <div class="ph"><img id="dImg" alt="" decoding="async" /></div>
+        <h3><span id="dTitle"></span></h3>
+        <p class="desc" id="dDesc"></p>
+        <div class="nav"><button type="button" id="dPrev" aria-label="Anterior">←</button><button type="button" id="dNext" aria-label="Próximo">→</button><a href="tour.html?apt=terreo" id="dTour">Caminhar pelo térreo</a></div>
+      </article>
+      </div>
+    </div></section>
+    <section class="say" id="say" aria-labelledby="sayT"><div class="say-in">
+      <p class="say-k">Sua próxima casa</p>
+      <h2 class="say-t" id="sayT">Imagine a luz da manhã na sua sala, o café na varanda, a casa cheia de quem você ama. Escolha a sua planta e <b>entre nela agora,</b> antes de todo mundo.</h2>
+    </div></section>
+    <div class="dusk">   <!-- one sunset behind the cards AND the numbers: no edge between them -->
+    <section class="units" id="units" aria-label="Plantas"><div class="units-pin">
+      <p class="units-k">Escolha a sua planta · entre no tour 3D</p>
+      <div class="units-row">
+        <div class="unit" data-apt="27" style="--i:0"><img src="home/units/u27.jpg" alt="Perspectiva ilustrada do apartamento de 27 m²" loading="lazy" decoding="async" />
+          <button class="u-open" type="button" aria-label="Abrir o tour 3D: Studio, 27 m²"></button>
+          <span class="u-txt"><span class="u-type">Studio</span><b class="u-m">27 m²</b><span class="u-more"><span class="u-desc">Compacto, completo e com varanda.</span><span class="u-go">Tour 3D →</span></span></span>
+          <span class="u-strip" aria-hidden="true"><span>27 m² · Studio</span></span></div>
+        <div class="unit" data-apt="33" style="--i:1"><img src="home/units/u33.jpg" alt="Perspectiva ilustrada do apartamento de 33 m²" loading="lazy" decoding="async" />
+          <button class="u-open" type="button" aria-label="Abrir o tour 3D: 1 suíte, 33 m²"></button>
+          <span class="u-txt"><span class="u-type">1 suíte</span><b class="u-m">33 m²</b><span class="u-more"><span class="u-desc">Living integrado e uma suíte só sua.</span><span class="u-go">Tour 3D →</span></span></span>
+          <span class="u-strip" aria-hidden="true"><span>33 m² · 1 suíte</span></span></div>
+        <div class="unit" data-apt="61" style="--i:2"><img src="home/units/u61.jpg" alt="Perspectiva ilustrada do apartamento de 61 m²" loading="lazy" decoding="async" />
+          <button class="u-open" type="button" aria-label="Abrir o tour 3D: 2 dorms · 1 suíte, 61 m²"></button>
+          <span class="u-txt"><span class="u-type">2 dorms · 1 suíte</span><b class="u-m">61 m²</b><span class="u-more"><span class="u-desc">Terraço gourmet para receber.</span><span class="u-go">Tour 3D →</span></span></span>
+          <span class="u-strip" aria-hidden="true"><span>61 m² · 2 dorms · 1 suíte</span></span></div>
+        <div class="unit" data-apt="79" style="--i:3"><img src="home/units/u79.jpg" alt="Perspectiva ilustrada do apartamento de 79 m²" loading="lazy" decoding="async" />
+          <button class="u-open" type="button" aria-label="Abrir o tour 3D: 2 dorms · 1 suíte, 79 m²"></button>
+          <span class="u-txt"><span class="u-type">2 dorms · 1 suíte</span><b class="u-m">79 m²</b><span class="u-more"><span class="u-desc">Living amplo, com vista aberta.</span><span class="u-go">Tour 3D →</span></span></span>
+          <span class="u-strip" aria-hidden="true"><span>79 m² · 2 dorms · 1 suíte</span></span></div>
+        <div class="unit" data-apt="93" data-pano="93s" data-note="Planta personalizada · living ampliado, sem o Dorm. 02" data-pano-alt="93" data-alt-note="Planta original · 3 dorms com o Dorm. 02" style="--i:4"><img src="home/units/u93.jpg" alt="Perspectiva ilustrada do apartamento de 93 m²" loading="lazy" decoding="async" />
+          <button class="u-open" type="button" aria-label="Abrir o tour 3D: 3 dorms · 1 suíte, 93 m² – planta personalizada, living ampliado sem o Dorm. 02"></button>
+          <span class="u-txt"><span class="u-type">3 dorms · 1 suíte</span><b class="u-m">93 m²</b><span class="u-more"><span class="u-dn"><span class="u-desc">Espaço para a família crescer.</span><span class="u-note">Tour com planta personalizada: living ampliado, sem o Dorm. 02</span></span><span class="u-go">Tour 3D →</span></span></span>
+          <span class="u-strip" aria-hidden="true"><span>93 m² · 3 dorms · 1 suíte</span></span></div>
+      </div>
+    </div></section>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contato" aria-labelledby="ctaT ctT">
+  <div class="ct-pin">
+      <div class="vcta" id="visitCta">
+        <div class="vc-glow" aria-hidden="true"></div>
+        <div class="vc-cards">
+          <a class="vc-card" href="visita/index.html#lobby" style="--i:0" aria-label="Visitar: Lobby"><span class="vc-in"><img alt="" loading="lazy" decoding="async" src="home/feel/lobby.jpg" /><span class="vc-lab">Lobby <b aria-hidden="true">↗</b></span></span></a>
+          <a class="vc-card" href="visita/index.html#piscina" style="--i:1" aria-label="Visitar: Piscina"><span class="vc-in"><img alt="" loading="lazy" decoding="async" src="home/feel/t-piscina2.jpg" /><span class="vc-lab">Piscina <b aria-hidden="true">↗</b></span></span></a>
+          <a class="vc-card" href="visita/index.html#casa" style="--i:2" aria-label="Visitar: Casa de campo"><span class="vc-in"><img alt="" loading="lazy" decoding="async" src="home/feel/t-casa.jpg" /><span class="vc-lab">Casa de campo <b aria-hidden="true">↗</b></span></span></a>
+          <a class="vc-card" href="visita/index.html#gourmet" style="--i:3" aria-label="Visitar: Espaço gourmet"><span class="vc-in"><img alt="" loading="lazy" decoding="async" src="home/feel/t-gourmet.jpg" /><span class="vc-lab">Espaço gourmet <b aria-hidden="true">↗</b></span></span></a>
+          <a class="vc-card vc-wide" href="visita/index.html#fitness" style="--i:4" aria-label="Visitar: Fitness"><span class="vc-in"><img alt="" loading="lazy" decoding="async" src="home/feel/t-fitness.jpg" /><span class="vc-lab">Fitness <b aria-hidden="true">↗</b></span></span></a>
+          <a class="vc-card" href="visita/index.html#salao" style="--i:5" aria-label="Visitar: Salão de festas"><span class="vc-in"><img alt="" loading="lazy" decoding="async" src="home/feel/t-salao.jpg" /><span class="vc-lab">Salão de festas <b aria-hidden="true">↗</b></span></span></a>
+          <a class="vc-card vc-wide" href="visita/index.html#spa2" style="--i:6" aria-label="Visitar: Spa e sauna"><span class="vc-in"><img alt="" loading="lazy" decoding="async" src="home/feel/t-spa2.jpg" /><span class="vc-lab">Spa e sauna <b aria-hidden="true">↗</b></span></span></a>
+          <a class="vc-card vc-wide" href="visita/index.html#quadra" style="--i:7" aria-label="Visitar: Quadra"><span class="vc-in"><img alt="" loading="lazy" decoding="async" src="home/feel/t-quadra.jpg" /><span class="vc-lab">Quadra <b aria-hidden="true">↗</b></span></span></a>
+          <a class="vc-card vc-wide" href="visita/index.html#playground" style="--i:8" aria-label="Visitar: Playground"><span class="vc-in"><img alt="" loading="lazy" decoding="async" src="home/feel/t-playground.jpg" /><span class="vc-lab">Playground <b aria-hidden="true">↗</b></span></span></a>
+          <a class="vc-card vc-wide" href="visita/index.html#brinquedoteca" style="--i:9" aria-label="Visitar: Brinquedoteca"><span class="vc-in"><img alt="" loading="lazy" decoding="async" src="home/feel/t-brinquedoteca.jpg" /><span class="vc-lab">Brinquedoteca <b aria-hidden="true">↗</b></span></span></a>
+        </div>
+        <div class="vcta-in">
+          <p class="vcta-k">Visita 360° · térreo, 1º e 2º pavimento</p>
+          <h2 class="vcta-t" id="ctaT">Entre pelo hall e<br /><b>caminhe pelo lazer.</b></h2>
+          <a class="vcta-b" id="vctaB" href="visita/index.html">Começar a visita <span aria-hidden="true">→</span></a>
+          <p class="vcta-n" id="vctaN">ou escolha um lugar e comece por ele</p>
+        </div>
+      </div>
+    <div class="ct-blue">
+      <div class="ct-stage">
+        <div class="ct-glass" aria-hidden="true"></div>
+        <div class="ct-grid">
+          <div class="ct-copy">
+            <p class="ct-k">Atendimento · Platinum Tatuapé</p>
+            <h2 class="ct-t" id="ctT">Fale<br /><b>conosco.</b></h2>
+            <p class="ct-p">Tire suas dúvidas, peça a tabela de valores e agende a sua visita.</p>
+            <div class="ct-mail">
+              <a class="ct-ml" id="ctMail" href="mailto:dabramo@lancamentoplatinum.com.br">dabramo@lancamentoplatinum.com.br</a>
+              <button type="button" id="ctCopy" aria-label="Copiar o e-mail" title="Copiar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5V6.9A2.4 2.4 0 0 0 13.1 4.5H6.9A2.4 2.4 0 0 0 4.5 6.9v6.2a2.4 2.4 0 0 0 2.4 2.4h1.6" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+            </div>
+            <a class="ct-wa" href="https://wa.me/5511943947783?text=Ol%C3%A1!%20Tenho%20interesse%20no%20Platinum%20Tatuap%C3%A9." target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91A9.85 9.85 0 0 0 12.04 2Zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24a8.2 8.2 0 0 1 8.24 8.25c0 4.54-3.7 8.23-8.24 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.22-.16-.47-.29Z"/></svg>
+              <span><b>Chamar no WhatsApp</b><small>+55 11 94394-7783</small></span>
+            </a>
+          </div>
+          <figure class="ct-ph"><picture><source media="(max-width: 700px)" srcset="home/corretor-m.jpg" /><img src="home/corretor.jpg" alt="O corretor do Platinum Tatuapé" loading="lazy" decoding="async" /></picture></figure>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<a class="wa-fab" id="waFab" href="https://wa.me/5511943947783?text=Ol%C3%A1!%20Tenho%20interesse%20no%20Platinum%20Tatuap%C3%A9." target="_blank" rel="noopener" aria-label="Falar no WhatsApp: +55 11 94394-7783"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91A9.85 9.85 0 0 0 12.04 2Zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24a8.2 8.2 0 0 1 8.24 8.25c0 4.54-3.7 8.23-8.24 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.22-.16-.47-.29Z"/></svg><span>WhatsApp</span></a>
+
+<footer class="foot" id="tours">
+  <img class="foot-logo" src="home/wordmark.png" alt="Platinum" loading="lazy" decoding="async" />
+  <p class="foot-legal">Imagens, plantas e perspectivas ilustrativas, sujeitas a alteração. Realização e construção: Diálogo Engenharia. · Fotos dos lugares no mapa 3D: Wikimedia Commons, CC BY-SA (<a href="home/places/CREDITS.txt">créditos</a>).</p>
+</footer>
+
+<script>
+  // glass panes: fewer on phones; each pane shows the picture aligned to the viewport (+ a small refraction shift)
+  const panes = document.getElementById('panes'), hero = document.getElementById('stage');
+  function buildPanes() {
+    const w = hero.clientWidth, n = w < 480 ? 5 : w < 1000 ? 7 : 9;
+    panes.replaceChildren();
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement('div'); p.className = 'pane';
+      const mid = (n - 1) / 2, k = Math.abs(i - mid);
+      p.style.setProperty('--d', (0.25 + k * 0.12 + (i % 2) * 0.05).toFixed(2) + 's');   // centre first, outwards
+      p.style.setProperty('--from', (i % 2 ? '-110%' : '110%'));                          // alternate up / down
+      p.style.setProperty('--skew', (i % 2 ? 4 : -4) + 'deg');
+      p.style.setProperty('--shift', ((i - mid) * -3) + 'px');
+      p.style.setProperty('--float', (i % 2 ? -7 : 7) + 'px');
+      panes.appendChild(p);
+    }
+    placePanes();
+  }
+  function placePanes() {
+    const w = hero.clientWidth;
+    for (const p of panes.children) { p.style.setProperty('--x', p.offsetLeft + 'px'); p.style.setProperty('--vw', w + 'px'); }
+  }
+  buildPanes();
+  let lastN = panes.children.length;
+  addEventListener('resize', () => { const w = hero.clientWidth, n = w < 480 ? 5 : w < 1000 ? 7 : 9; if (n !== lastN) { lastN = n; buildPanes(); document.body.classList.contains('done') && panes.classList.add('settle'); } else placePanes(); });
+
+  // the 360° (tour.html?apt=terreo&embed=home – aerial view only, no interior) loads behind the hero while the logo
+  // animates. When both are done the hero slides up and the building flies in from far away, then keeps orbiting.
+  // Scrolling slides the text panel over it. No WebGL / load failure / 40 s timeout → the plain page (hero, then tours).
+  const body = document.body, sceneEl = document.getElementById('scene'), frame = document.getElementById('three'), hint = document.getElementById('hint'), panel = document.getElementById('panel');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const gl = (() => { try { return !!document.createElement('canvas').getContext('webgl2'); } catch { return false; } })();
+  let introDone = false, ready3d = false, lifted = false;
+  if (gl) {
+    body.classList.add('has3d');
+    frame.src = 'tour.html?apt=terreo&embed=home';
+    addEventListener('message', e => {
+      if (e.origin !== location.origin || e.data !== 'platinum-3d-ready') return;
+      ready3d = true; sceneEl.classList.add('ready'); maybeLift();
+    });
+    var fail = setTimeout(() => { if (!ready3d) { body.classList.remove('has3d'); frame.removeAttribute('src'); } }, 40000);
+  }
+  const post = msg => frame.contentWindow && frame.contentWindow.postMessage(msg, location.origin);
+  function maybeLift() {
+    if (lifted || !introDone || !ready3d) return;
+    lifted = true; clearTimeout(fail); scrollTo(0, 0);
+    body.classList.add('lift'); post({ type: 'intro' });
+    setTimeout(() => load(shots[0]), 3500);
+    body.classList.remove('locked');
+  }
+  // the white panel: the two words rise when it is well into view; the renders are fetched only after the hero lifts
+  // (first one early, the rest when the panel shows up) so they never compete with the 3D download
+  const MINI_YAW = new URLSearchParams(location.search).has('yaw') ? +new URLSearchParams(location.search).get('yaw') : -1.5708;
+  const feel = document.getElementById('feel'), shots = [...document.querySelectorAll('#frame img')], capName = document.getElementById('capName');
+  const load = im => { if (im.dataset.src) { im.src = im.dataset.src; delete im.dataset.src; } };
+  new IntersectionObserver(es => { for (const e of es) panel.classList.toggle('show', e.isIntersecting); }, { rootMargin: '0px 0px -38% 0px' }).observe(panel);
+  new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { o.disconnect(); panel.querySelectorAll('img[data-src]').forEach(load); } }).observe(panel);
+  { const o = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); o.unobserve(e.target); } }, { rootMargin: '0px 0px -12% 0px' });
+    panel.querySelectorAll('.rv').forEach(el => o.observe(el)); }
+  // the gap between the words follows the scroll (0 → 1 over the first 55 % of the pinned stretch); while it is open
+  // the renders cross-fade every few seconds
+  let gapP = 0, shot = 0;
+  function openGap() {
+    const r = feel.getBoundingClientRect(), t = Math.min(1, Math.max(0, -r.top / ((r.height - innerHeight) * 0.55)));
+    const p = t * t * (3 - 2 * t);
+    if (p !== gapP) { gapP = p; feel.style.setProperty('--p', p.toFixed(4)); }
+    feel.classList.toggle('leaving', r.bottom < innerHeight * 1.25);   // the caption goes before the next screen arrives
+  }
+  setInterval(() => {
+    if (gapP < 0.2 || document.hidden || feel.getBoundingClientRect().bottom < 0) return;
+    const next = shots[(shot + 1) % shots.length]; if (!next.complete || !next.naturalWidth) return;
+    shots[shot].classList.remove('on'); shot = (shot + 1) % shots.length; next.classList.add('on'); capName.textContent = next.dataset.cap;
+  }, 2800);
+  addEventListener('resize', openGap);
+  // the little levels: baked models (tools/bake_mini.mjs, ~110 + 40 KB) drawn by home/mini3d.js, fetched only when the
+  // block comes close. The block stays pinned while the page scrolls: the 1º pavimento comes down onto the térreo, where
+  // it really sits, and the text and the numbered points switch to it. A point opens its render + a few words.
+  { const LEVELS = [
+      { key: 'terreo', title: 'Térreo', sub: 'Implantação · lazer e estacionamento', tag: 'Arraste para girar · toque nos pontos · role para subir', tour: ['terreo', 'Caminhar pelo térreo'],
+        kicker: 'Por dentro do térreo', lead: 'Chegar em casa<br /><b>já é lazer.</b>',
+        body: 'Pela Praça Heitor Levi você entra no lobby de pé-direito duplo. Ao redor, coworking, casa de campo com spa, churrasqueira, pet place e quadra, cercados de jardim.',
+        facts: [['2 lobbies', 'social e estacionamento'], ['8 espaços', 'de lazer no térreo'], ['Pé-direito', 'duplo no lobby'], ['Acessos', 'pela Praça Heitor Levi']],
+        places: [   // same order as the points baked into terreo-mini.bin
+          ['acesso', 'Acesso social', 'A chegada pela Praça Heitor Levi: acesso social e portaria com caixilhos, vidro e porta blindados.', 'acesso'],
+          ['lobby', 'Lobby com pé-direito duplo', 'Pé-direito duplo, grandes panos de vidro e paisagismo: a luz natural recebe você logo na entrada.', 'lobby'],
+          ['lobby2', 'Lobby do estacionamento', 'O segundo lobby, junto aos elevadores: quem chega de carro também é recebido com pé-direito alto, madeira e luz natural.', 't-lobby2'],
+          ['coworking', 'Coworking', 'Um espaço reservado para trabalhar ou estudar a poucos passos de casa.', 't-coworking'],
+          ['casa', 'Casa de campo', 'Um living aberto para o jardim, com spa e churrasqueira, para receber sem pressa.', 't-casa'],
+          ['spa', 'Deck com spa', 'Deck de madeira com spa aquecido e espreguiçadeiras, aberto para o jardim e para a casa de campo.', 't-spa'],
+          ['pet', 'Pet place', 'Área ao ar livre para os pets brincarem, ao lado do pet care.', 't-pet'],
+          ['churrasqueira', 'Churrasqueira', 'Churrasqueira com bancada, ilha e mesa sob o pergolado de madeira, aberta para a quadra.', 't-churrasqueira'],
+          ['quadra', 'Quadra recreativa', 'Para jogar, treinar ou só gastar energia sem sair do condomínio.', 't-quadra'],
+        ] },
+      { key: 'pav1', title: '1º Pavimento', sub: 'Beauty, massagem e bicicletário', tag: 'Toque nos pontos · role para subir', tour: ['pav1', 'Caminhar pelo 1º pavimento'],
+        kicker: 'Um andar acima', lead: 'Cuidar de você<br /><b>sem sair de casa.</b>',
+        body: 'No 1º pavimento ficam o espaço beauty, as salas de massagem e um bicicletário amplo, com terraço aberto para o jardim.',
+        facts: [['Beauty', 'espaço com terraço'], ['Massagem', 'salas reservadas'], ['Bicicletário', 'com 13 m de frente'], ['Terraço', 'aberto para o jardim']],
+        places: [   // same order as the points baked into pav1-mini.bin
+          ['beauty', 'Espaço beauty', 'Um salão completo dentro do condomínio, com terraço próprio e luz natural.', 't-beauty'],
+          ['massagem', 'Salas de massagem', 'Salas reservadas e silenciosas para massagem e relaxamento, ao lado do espaço beauty.', 't-massagem'],
+          ['bike', 'Bicicletário', 'Bicicletário amplo, com suportes e espaço para manutenção, a um elevador da rua.', 't-bike'],
+          ['terraco', 'Terraço', 'Um terraço aberto no 1º pavimento, de frente para a praça.', null],
+        ] },
+      { key: 'pav2', title: '2º Pavimento', sub: 'Lazer: piscinas, fitness, festas e jogos', tag: 'Toque nos pontos', tour: ['pav2', 'Caminhar pelo 2º pavimento'],
+        kicker: 'O andar do lazer', lead: 'Tudo para o seu<br /><b>tempo livre.</b>',
+        body: 'Piscina adulto com raia de 25 m, fitness, salão de festas, espaço gourmet, jogos, brinquedoteca, spa com sauna seca, churrasqueira com forno de pizza e playground, todos no mesmo andar.',
+        facts: [['25 m', 'de raia na piscina adulto'], ['200 m²', 'de fitness'], ['130 m²', 'de salão de festas'], ['60 m²', 'de espaço gourmet']],
+        places: [   // same order as the points baked into pav2-mini.bin
+          ['fitness', 'Fitness', 'Fitness de 200 m² com sala multifuncional, equipado para treinar sem sair de casa.', 't-fitness'],
+          ['gourmet', 'Espaço gourmet', 'Cozinha aberta e mesa para receber em 60 m², ao lado do terraço.', 't-gourmet'],
+          ['terraco', 'Terraço de festas', 'Terraço coberto entre o salão de festas e o espaço gourmet, com sofás, poltronas e vista aberta para o bairro.', 't-terraco2'],
+          ['salao', 'Salão de festas', '130 m² para festas e encontros, com lounge e terraço próprios.', 't-salao'],
+          ['jogos', 'Espaço jogos', 'Mesas de jogos e um lounge para reunir os amigos.', 't-jogos'],
+          ['brinquedoteca', 'Brinquedoteca', 'Um espaço lúdico e seguro para as crianças, junto à pista infantil.', 't-brinquedoteca'],
+          ['churrasqueira', 'Churrasqueira com forno de pizza', 'Churrasqueira e forno de pizza ao ar livre, ao lado do playground.', 't-churrasqueira2'],
+          ['playground', 'Playground', 'Brinquedos ao ar livre para as crianças, com a churrasqueira por perto.', 't-playground'],
+          ['spa', 'Spa e sauna seca', 'Spa aquecido, sauna seca e vestiários, com o pool bar ao lado.', 't-spa2'],
+          ['piscina', 'Piscina adulto', 'Raia dupla de 25 m, deck molhado e solarium com vista para o bairro.', 't-piscina2'],
+        ] },
+    ];
+    const mini = document.getElementById('mini'), spotsEl = document.getElementById('spots'), side = document.getElementById('side'), detail = document.getElementById('detail');
+    const stack = document.getElementById('stack'), mag = document.getElementById('mag');
+    const $ = id => document.getElementById(id), two = n => String(n).padStart(2, '0');
+    let lv = 0, PLACES = LEVELS[0].places, btns = [], cur = -1, swap = 0, view = null, goals = { lift: [0, 0, 0], fade: [0, 0, 0], active: 0, scroll: 0 };   // (set by onStack)
+    const makeSpots = () => {
+      spotsEl.replaceChildren();
+      btns = PLACES.map(([, title], i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'spot'; b.textContent = i + 1; b.title = title; b.setAttribute('aria-label', title);
+        b.addEventListener('click', () => open(i));
+        b.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') view?.tint?.(PLACES[i][0]); });   // hover: that area in colour
+        b.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') view?.tint?.(null); });
+        b.addEventListener('focus', () => view?.tint?.(PLACES[i][0])); b.addEventListener('blur', () => view?.tint?.(null));
+        spotsEl.append(b); return b; });
+    };
+    makeSpots();
+    function open(i) {
+      i = (i + PLACES.length) % PLACES.length; const [id, title, desc, img] = PLACES[i], first = cur < 0; cur = i;
+      btns.forEach((b, k) => b.classList.toggle('sel', k === i)); view?.focus(id);
+      side.classList.add('open'); detail.classList.remove('show'); clearTimeout(swap);
+      if (first && matchMedia('(max-width: 860px)').matches) setTimeout(() => detail.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 60);   // stacked layout: bring the picture into view
+      swap = setTimeout(() => {
+        $('dNum').textContent = two(i + 1); $('dTitle').textContent = title; $('dDesc').textContent = desc;
+        const im = $('dImg'), show = () => { if (cur === i) detail.classList.add('show'); };
+        detail.classList.toggle('noimg', !img);
+        if (!img) { im.removeAttribute('src'); show(); return; }
+        im.alt = 'Perspectiva ilustrada: ' + title; im.onload = im.onerror = show; im.src = `home/feel/${img}.jpg`; if (im.complete) show();
+      }, first ? 0 : 380);
+    }
+    function close() { view?.focus(null); cur = -1; clearTimeout(swap); detail.classList.remove('show'); side.classList.remove('open'); btns.forEach(b => b.classList.remove('sel')); }
+    $('dClose').addEventListener('click', close); $('dPrev').addEventListener('click', () => open(cur - 1)); $('dNext').addEventListener('click', () => open(cur + 1));
+    addEventListener('keydown', e => { if (e.key === 'Escape' && cur >= 0) close(); });
+    // switch the texts and the points to another level: the old lines leave upwards, the new ones rise into the same place
+    const floorEl = document.getElementById('floor'), copyEl = document.getElementById('copy');
+    const calm = matchMedia('(prefers-reduced-motion: reduce)');
+    let swapTok = 0;
+    function writeLevel() {
+      const L = LEVELS[lv];
+      $('fTitle').textContent = L.title; $('fSub').textContent = L.sub; $('tag').textContent = L.tag;
+      $('cKicker').textContent = L.kicker; $('cLead').innerHTML = L.lead; $('cBody').textContent = L.body;
+      $('cFacts').innerHTML = L.facts.map(([a, b]) => `<div><dt>${a}</dt><dd>${b}</dd></div>`).join('');
+      $('dTour').href = 'tour.html?apt=' + L.tour[0]; $('dTour').textContent = L.tour[1];
+    }
+    function setLevel(n) {
+      if (n === lv) return; lv = n; close();
+      PLACES = LEVELS[n].places; makeSpots();
+      const els = [floorEl, ...copyEl.children], tok = ++swapTok;
+      if (calm.matches || !els[0].animate) { writeLevel(); return; }
+      const outs = els.map((el, i) => el.animate([{}, { opacity: 0, translate: '0 -18px', filter: 'blur(6px)' }],
+        { duration: 280, delay: i * 40, easing: 'cubic-bezier(.4, 0, 1, 1)', fill: 'forwards' }));
+      Promise.all(outs.map(a => a.finished)).then(() => {
+        if (tok !== swapTok) return;                                    // a newer swap took over
+        writeLevel();
+        els.forEach((el, i) => { el.getAnimations().forEach(a => a.cancel());
+          el.animate([{ opacity: 0, translate: '0 22px', filter: 'blur(6px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0)' }],
+            { duration: 700, delay: i * 80, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'backwards' }); });
+      }).catch(() => {});
+    }
+    // scroll → the plans scroll through the frame like a film strip: the térreo rises out of the top while the 1º pavimento comes up
+    // from the bottom to the centre, then the same for the 2º. Each level rests in the centre for part of the scroll.
+    const smooth = x => { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); };
+    function onStack() {
+      const r = stack.getBoundingClientRect(), range = stack.offsetHeight - mag.offsetHeight;
+      mag.style.top = Math.min(0, innerHeight - mag.offsetHeight) + 'px';   // taller than the screen (phones): it sticks with its bottom in view
+      const t = range > 0 ? Math.min(1, Math.max(0, -r.top / range)) : 0, pos = t * (LEVELS.length - 1);
+      const k = Math.min(LEVELS.length - 2, Math.floor(pos)), f = pos - k;   // step k → k + 1, f = 0..1 through it
+      const s = k + smooth((f - 0.2) / 0.6), n = Math.round(s);          // s: where the strip is (fractional while moving)
+      goals = { lift: LEVELS.map(() => 0), fade: LEVELS.map(() => 0), active: n, scroll: s };
+      view?.set(goals); setLevel(n);
+      spotsEl.classList.toggle('moving', Math.abs(s - n) > 0.02);
+    }
+    // the glass starts just before the text, leaving a clear gap after the 3D plan
+    // big screens: the whole block (plan + text) scales with the screen, limited by its height so it still fits; phones / small: 1
+    const placeGlass = () => {
+      const z = innerWidth > 860 ? Math.min(1.9, Math.max(1, Math.min(innerWidth / 1440, innerHeight / 860))) : 1;
+      if (mag.style.getPropertyValue('--z') !== z.toFixed(3)) mag.style.setProperty('--z', z.toFixed(3));
+      const m = mag.getBoundingClientRect(), a = mini.getBoundingClientRect(), b = side.getBoundingClientRect();
+      // a clear gap after the plan: the glass starts just before the text (a little padding inside it), never touching the plan
+      if (b.left > a.right) mag.style.setProperty('--glassL', (Math.max(a.right + 24 * z, b.left - 44 * z) - m.left).toFixed(1) + 'px');
+    };
+    new ResizeObserver(placeGlass).observe(mag); addEventListener('resize', placeGlass); placeGlass();
+    // statement: split into words (keeping <b>), then fill them in reading order with the scroll
+    { const sayEl = document.getElementById('say'), t = document.getElementById('sayT'), units = document.getElementById('units'), words = [];
+      const split = node => [...node.childNodes].forEach(n => {
+        if (n.nodeType === 3) { const f = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(part => { if (!part) return; if (/^\s+$/.test(part)) { f.append(part); return; }
+            const w = document.createElement('span'); w.className = 'w'; w.textContent = part; words.push(w); f.append(w); });
+          n.replaceWith(f); }
+        else if (n.nodeType === 1) split(n);
+      });
+      split(t);
+      const fill = () => { const r = sayEl.getBoundingClientRect(), run = r.height - innerHeight;
+        const k = run > 0 ? Math.min(1, Math.max(0, (-r.top + innerHeight * 0.35) / (run * 0.9 + innerHeight * 0.35))) : 1, at = k * words.length;
+        words.forEach((w, i) => { const p = Math.min(1, Math.max(0, at - i)).toFixed(3); if (w.style.getPropertyValue('--p') !== p) w.style.setProperty('--p', p); });
+        const sun = at >= words.length;                                   // last word ("mundo.") filled → the sunset, on both panels at once
+        if (sun !== sayEl.classList.contains('sun')) { sayEl.classList.toggle('sun', sun); units.classList.toggle('sun', sun); } };
+      addEventListener('scroll', fill, { passive: true }); addEventListener('resize', fill); fill(); }
+    // the visit panel: the place cards ride a slow ring (an ellipse centred on the text, evenly spaced, upright, a touch bigger at the
+    // front) – it turns on its own and faster while you scroll; hovering a card holds the ring so it can be clicked. Cards rise in
+    // once; a light follows the cursor and the button leans towards it.
+    { const sec = document.getElementById('visitCta'), btn = document.getElementById('vctaB'), calm = matchMedia('(prefers-reduced-motion: reduce)');
+      const all = [...sec.querySelectorAll('.vc-card')];
+      new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { sec.classList.add('in'); o.disconnect(); } }, { threshold: 0.2 }).observe(sec);
+      let ang = -Math.PI / 2, last = 0, lastY = scrollY, held = false, on = false, raf = 0, mx = 0, my = 0;
+      all.forEach(c => { c.addEventListener('pointerenter', () => { held = true; }); c.addEventListener('pointerleave', () => { held = false; }); });
+      const frame = now => {
+        raf = 0; if (!on) return;
+        const dt = last ? Math.min(0.05, (now - last) / 1000) : 0; last = now;
+        const dy = scrollY - lastY; lastY = scrollY;
+        if (!held && !calm.matches) ang += dt * (Math.PI * 2 / 80) + dy * 0.0012;   // one turn in 80 s, plus the scroll
+        const cards = all.filter(c => c.offsetParent), n = cards.length, W = sec.clientWidth, H = sec.clientHeight, phone = W < 860;
+        const rx = W * (phone ? 0.36 : 0.385), ry = H * (phone ? 0.4 : 0.37), cx = W / 2 + mx * 14, cy = H / 2 + my * 10;
+        cards.forEach((c, i) => {
+          const a = ang + i * Math.PI * 2 / n, x = cx + Math.cos(a) * rx, y = cy + Math.sin(a) * ry, depth = (Math.sin(a) + 1) / 2;
+          const k = 0.86 + depth * 0.18, w = c.offsetWidth, h = c.offsetHeight;
+          c.style.transform = `translate3d(${(x - w / 2).toFixed(1)}px, ${(y - h / 2).toFixed(1)}px, 0) scale(${k.toFixed(3)})`;
+          c.style.zIndex = String(1 + Math.round(depth * 10));
+          if (phone) { const mid = Math.abs(y - H / 2) < H * 0.22; c.firstElementChild.style.opacity = mid ? '.16' : ''; c.style.pointerEvents = mid ? 'none' : ''; }   // phones: faint (and not tappable) while passing the text
+        });
+        raf = requestAnimationFrame(frame);
+      };
+      new IntersectionObserver(es => es.forEach(e => { on = e.isIntersecting; last = 0; lastY = scrollY; if (on && !raf) raf = requestAnimationFrame(frame); }), { rootMargin: '100px 0px' }).observe(sec);
+      sec.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const r = sec.getBoundingClientRect();
+        mx = (e.clientX - r.left) / r.width * 2 - 1; my = (e.clientY - r.top) / r.height * 2 - 1;
+        sec.style.setProperty('--mx', mx.toFixed(3)); sec.style.setProperty('--my', my.toFixed(3));
+        const b = btn.getBoundingClientRect(), dx = e.clientX - (b.left + b.width / 2), dy = e.clientY - (b.top + b.height / 2), d = Math.hypot(dx, dy);
+        const k = d < 160 ? (1 - d / 160) * 0.28 : 0; btn.style.setProperty('--bx', (dx * k).toFixed(1) + 'px'); btn.style.setProperty('--by', (dy * k).toFixed(1) + 'px'); });
+      sec.addEventListener('pointerleave', () => { mx = my = 0; held = false; btn.style.setProperty('--bx', '0px'); btn.style.setProperty('--by', '0px'); }); }
+    // contact: the blue pill grows to the full screen over the first ~55 % of the pinned scroll (--p), then the content rises in (--q)
+    { const sec = document.getElementById('contato'), calm = matchMedia('(prefers-reduced-motion: reduce)'); let raf = 0;
+      const sm = t => t * t * (3 - 2 * t);
+      // through the pinned scene (k 0 → 1): the blue pill rises into the pink panel from below the screen's bottom edge (k .04 → .2),
+      // rests at the bottom a moment, then grows to fill the screen (k .26 → .62); then the contact rises in (k .62 → .84)
+      const waFab = document.getElementById('waFab'), pinEl = sec.querySelector('.ct-pin'), pin = sec.querySelector('.ct-blue'), lerp = (a, b, t) => a + (b - a) * t, cl = (x, a, b) => Math.min(1, Math.max(0, (x - a) / (b - a)));
+      const paint = () => { raf = 0; const r = sec.getBoundingClientRect(), run = r.height - innerHeight, W = pin.clientWidth, H = pin.clientHeight;
+        const k = calm.matches ? 1 : run > 0 ? Math.min(1, Math.max(0, -r.top / run)) : 1;
+        // one motion: the panel rises from the bottom edge, widening as it grows (no pill, no pause), full by k .6
+        const g = sm(cl(k, 0.02, 0.6)), q = sm(cl(k, 0.08, 0.42)), grow = g;
+        const ti = H * (1 - g), si = (W - W * lerp(0.46, 1, g)) / 2, bi = 0, rr = lerp(40, 0, g);
+        sec.style.setProperty('--ti', ti.toFixed(1) + 'px'); sec.style.setProperty('--bi', bi + 'px'); sec.style.setProperty('--si', si.toFixed(1) + 'px'); sec.style.setProperty('--rr', rr.toFixed(1) + 'px');
+        const b = sm(cl(k, 0, 0.42));                                                             // the visit panel's background: sunset orange → blue
+        pinEl.style.backgroundColor = `rgb(${lerp(223, 30, b).toFixed(0)}, ${lerp(134, 48, b).toFixed(0)}, ${lerp(91, 104, b).toFixed(0)})`;
+        sec.style.setProperty('--cs', lerp(0.46, 1, g).toFixed(4));   /* = the panel's width share: the content always fits it side to side */ sec.style.setProperty('--cy', (H * (1 - g) / 2).toFixed(1) + 'px');   // content: small, centred in the visible blue
+        sec.style.setProperty('--p', grow.toFixed(4)); sec.style.setProperty('--q', q.toFixed(4)); sec.classList.toggle('full', q > 0.02);
+        const rr2 = sec.getBoundingClientRect(); waFab?.classList.toggle('off', q > 0.05 && rr2.bottom > innerHeight * 0.3); };
+      const ph = sec.querySelector('.ct-ph'), blue = sec.querySelector('.ct-blue');
+      const grid = sec.querySelector('.ct-grid');
+      const glass = () => { if (!ph.offsetWidth) return;                       // offsets ignore the stage's scale: measured in its own layout
+        const l = grid.offsetLeft + ph.offsetLeft, t = grid.offsetTop + ph.offsetTop;
+        sec.style.setProperty('--gl', Math.max(0, l + Math.min(28, ph.offsetWidth * 0.06)).toFixed(1) + 'px'); sec.style.setProperty('--gh', (t + ph.offsetHeight + Math.min(40, blue.clientHeight * 0.04)).toFixed(1) + 'px'); };   // (starts a little INSIDE the photo's left edge)
+      const kick = () => { if (!raf) raf = requestAnimationFrame(() => { glass(); paint(); }); };
+      addEventListener('scroll', kick, { passive: true }); addEventListener('resize', kick); kick();
+      const btn = document.getElementById('ctCopy'), mail = document.getElementById('ctMail').textContent.trim();
+      btn.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(mail); } catch { const t = document.createElement('textarea'); t.value = mail; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); }
+        const icon = btn.innerHTML; btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'; btn.classList.add('ok'); btn.setAttribute('aria-label', 'E-mail copiado');
+        setTimeout(() => { btn.innerHTML = icon; btn.classList.remove('ok'); btn.setAttribute('aria-label', 'Copiar o e-mail'); }, 2200); }); }
+    // go to the contact with its content already up (the section is a long pinned scene; its top is still the visit panel)
+    function goContact() { const c = document.getElementById('contato'); if (!c) return; const run = c.offsetHeight - innerHeight;
+      scrollTo({ top: c.getBoundingClientRect().top + scrollY + run * 0.9, behavior: 'smooth' }); }
+    if (location.hash === '#contato') addEventListener('load', () => setTimeout(() => { const c = document.getElementById('contato'); scrollTo(0, c.getBoundingClientRect().top + scrollY + (c.offsetHeight - innerHeight) * 0.9); }, 400));
+    // plan cards (desktop): the apartment's floor plan in a small card that follows the cursor while you hover the card
+    if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      const tip = document.createElement('div'); tip.className = 'u-plan'; tip.setAttribute('aria-hidden', 'true');
+      tip.innerHTML = '<img alt="" decoding="async" /><span>Planta ilustrativa · <b></b></span>'; document.body.append(tip);
+      const im = tip.querySelector('img'), lab = tip.querySelector('b');
+      let tx = 0, ty = 0, x = 0, y = 0, raf = 0, shown = false;
+      const place = (cx, cy) => { const w = tip.offsetWidth || 220, h = tip.offsetHeight || 230, g = 22;
+        tx = cx + g + w > innerWidth - 8 ? cx - g - w : cx + g; ty = Math.min(innerHeight - h - 8, Math.max(8, cy + g)); };
+      const step = () => { x += (tx - x) * 0.22; y += (ty - y) * 0.22; tip.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+        raf = shown && (Math.abs(tx - x) > 0.3 || Math.abs(ty - y) > 0.3) ? requestAnimationFrame(step) : 0; };
+      const busy = () => document.documentElement.classList.contains('walking') || document.querySelector('.units-row.open');
+      document.querySelectorAll('.unit').forEach(card => {
+        card.addEventListener('pointerenter', e => { if (e.pointerType !== 'mouse' || busy()) return;
+          im.src = `home/plans/p${card.dataset.apt}.jpg`; lab.textContent = card.querySelector('.u-m').textContent;
+          place(e.clientX, e.clientY); if (!shown) { x = tx; y = ty; } shown = true; tip.classList.add('on'); if (!raf) raf = requestAnimationFrame(step); });
+        card.addEventListener('pointermove', e => { if (!shown) return; if (busy()) { shown = false; tip.classList.remove('on'); return; } place(e.clientX, e.clientY); if (!raf) raf = requestAnimationFrame(step); });
+        card.addEventListener('pointerleave', () => { shown = false; tip.classList.remove('on'); });
+        card.addEventListener('click', () => { shown = false; tip.classList.remove('on'); });
+      });
+    }
+    // plan cards: rise in once the row comes into view
+    new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { document.getElementById('units').classList.add('in'); o.disconnect(); } }, { threshold: 0.25 })
+      .observe(document.getElementById('units'));
+    // plan cards: a click opens a street-view style visit - baked 360° photos (home/pano.js), not the live 3D - in a modal
+    // that grows out of the card (full screen on phones). Plan tabs in the modal switch apartments. Big screens get the
+    // HD photo set (home/pano/<apt>/hd/, 1536 px faces), falling back to the standard one.
+    { const row = document.querySelector('.units-row'), cards = [...row.querySelectorAll('.unit')], phone = matchMedia('(hover: none), (max-width: 860px)');
+      let modal = null, walk = null, cur = null;
+      const R = 22, ez = 'cubic-bezier(.2, .8, .2, 1)';
+      const clipFrom = (card, box) => { const a = card.getBoundingClientRect(), b = box.getBoundingClientRect();
+        return `inset(${a.top - b.top}px ${b.right - a.right}px ${b.bottom - a.bottom}px ${a.left - b.left}px round ${R}px)`; };
+      const closeWalk = () => {
+        if (!modal) return;
+        if (document.fullscreenElement) document.exitFullscreen();
+        const m = modal, w = walk, card = cur; modal = walk = cur = null;
+        document.documentElement.classList.remove('walking');
+        m.classList.add('closing');
+        const a = card.getBoundingClientRect();
+        const shrink = !m.classList.contains('full') && a.bottom > 0 && a.top < innerHeight;
+        if (shrink) w.animate([{ clipPath: `inset(0 round ${R}px)` }, { clipPath: clipFrom(card, w) }], { duration: 420, easing: 'cubic-bezier(.4, 0, .2, 1)', fill: 'forwards' });
+        setTimeout(() => { w._viewer?.destroy(); m.remove(); }, shrink ? 430 : 360);
+      };
+      const loadPano = (w, card, full, alt) => {
+        const id = alt ? card.dataset.panoAlt : card.dataset.pano || card.dataset.apt, std = `home/pano/${id}/`;
+        const bases = !full && Math.max(innerWidth, innerHeight) * devicePixelRatio > 1300 ? [`${std}hd/`, std] : [std];
+        const tryBase = k => import(new URL('home/pano.js', document.baseURI).href)
+          .then(mod => mod.pano(w.querySelector('.pv-host'), { base: bases[k], onReady: () => { w.classList.add('ready'); setTimeout(() => w.classList.add('used'), 6500); } }))
+          .catch(err => { if (k + 1 < bases.length) return tryBase(k + 1); throw err; });
+        tryBase(0).then(v => { if (w.isConnected) w._viewer = v; else v.destroy(); })
+          .catch(err => { console.error('pano:', err); w.querySelector('.u-load span:last-child').textContent = 'Não foi possível abrir o tour'; });
+      };
+      let alt = false;                                                   // 93 m²: showing the original 3-dorm plan instead of the personalized one
+      const openWalk = (card, grow = true, useAlt = false) => {
+        if (card === cur && useAlt === alt) return;
+        alt = useAlt && !!card.dataset.panoAlt;
+        const full = phone.matches, name = `${card.querySelector('.u-type').textContent} · ${card.querySelector('.u-m').textContent}`;
+        if (!modal) {
+          modal = document.createElement('div'); modal.className = 'u-modal' + (full ? ' full' : '');
+          modal.addEventListener('click', e => { if (e.target === modal) closeWalk(); });
+          document.body.append(modal); document.documentElement.classList.add('walking');
+        } else { walk?._viewer?.destroy(); walk?.remove(); grow = false; }
+        cur = card;
+        const tabs = cards.map(c => `<button type="button" data-apt="${c.dataset.apt}"${c === card ? ' class="on" aria-current="true"' : ''}>${c.querySelector('.u-m').textContent}</button>`).join('');
+        walk = document.createElement('div'); walk.className = 'u-walk';
+        walk.innerHTML = `<div class="pv-host" role="application" aria-label="Tour 360° – ${name}"></div>
+          <div class="u-load"><span class="u-spin"></span><span>Preparando o tour</span></div>
+          <div class="u-bar"><span class="u-chip">${name}</span>${(alt ? card.dataset.altNote : card.dataset.note) ? `<span class="u-chip u-chip-note">${alt ? card.dataset.altNote : card.dataset.note}</span>` : ''}${card.dataset.panoAlt ? `<button class="u-alt" type="button" data-a="alt">${alt ? 'Ver planta personalizada' : 'Explorar com 3 dorms'}</button>` : ''}<nav class="u-plans" aria-label="Plantas">${tabs}</nav><button class="u-talk" type="button" data-a="talk">Fale conosco</button><button class="u-btn" type="button" data-a="fs" aria-label="Tela cheia">⤢</button><button class="u-btn" type="button" data-a="x" aria-label="Fechar o tour">×</button></div>
+          <p class="u-hint">Arraste para olhar · ${full ? 'toque' : 'clique'} nas setas para andar</p><p class="ill-tag u-ill">Perspectiva ilustrativa</p>`;
+        walk.style.backgroundImage = `url("${card.querySelector('img').src}")`;
+        modal.append(walk);
+        if (grow && !full) walk.animate([{ clipPath: clipFrom(card, walk) }, { clipPath: `inset(0 round ${R}px)` }], { duration: 650, easing: ez });
+        else if (!grow) walk.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+        const w = walk;
+        w.querySelector('[data-a=x]').addEventListener('click', closeWalk);
+        w.querySelector('[data-a=talk]').addEventListener('click', () => { closeWalk(); setTimeout(goContact, 450); });
+        w.querySelector('[data-a=fs]').addEventListener('click', () => document.fullscreenElement ? document.exitFullscreen() : w.requestFullscreen?.());
+        w.querySelectorAll('.u-plans button').forEach(b => b.addEventListener('click', () => openWalk(cards.find(c => c.dataset.apt === b.dataset.apt))));
+        w.querySelector('[data-a=alt]')?.addEventListener('click', () => openWalk(card, false, !alt));
+        loadPano(w, card, full, alt);
+      };
+      cards.forEach(c => c.querySelector('.u-open').addEventListener('click', () => openWalk(c)));
+      addEventListener('keydown', e => { if (e.key === 'Escape' && cur && !document.fullscreenElement) closeWalk(); });
+    }
+    addEventListener('scroll', onStack, { passive: true }); addEventListener('resize', onStack); onStack();
+    const fallback = () => { mini.innerHTML = '<img alt="Perspectiva ilustrada do acesso do Platinum Tatuapé" src="home/feel/acesso.jpg" />'; };
+    new IntersectionObserver((es, o) => {
+      if (!es.some(e => e.isIntersecting)) return; o.disconnect();
+      import(new URL('home/mini3d.js', document.baseURI).href).then(m => m.mini3d(document.getElementById('miniC'), { urls: ['home/terreo-mini.bin', 'home/pav1-mini.bin', 'home/pav2-mini.bin'], yaw: MINI_YAW, pitch: 1.5707,
+        onFrame(ps) { ps.forEach((p, k) => { if (!btns[k]) return; btns[k].style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`; btns[k].style.zIndex = (k === cur ? 3000 : 1000) - Math.round(p.front); }); } }))
+        .then(v => { view = v; v.set(goals); mini.classList.add('on'); }).catch(e => { console.error('mini3d:', e); fallback(); });
+    }, { rootMargin: '900px 0px' }).observe(mini);
+  }
+  // scroll: hide the hint; stop rendering the 360° once the panel covers it completely (phones / old computers)
+  let raf = 0, covered = false;
+  addEventListener('scroll', () => {
+    if (!lifted || raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      hint.classList.toggle('gone', scrollY > 24);
+      openGap();
+      const c = panel.getBoundingClientRect().top <= 1;
+      if (c !== covered) { covered = c; post({ type: 'pause', on: c }); }
+    });
+  }, { passive: true });
+  // drag on the 360° → rotate it (mouse: also tilt). The 3D frame itself takes no pointer input, so the wheel and
+  // vertical swipes keep scrolling the page; touch-action: pan-y leaves horizontal swipes for the rotation.
+  { const view = sceneEl.querySelector('.view'); let id = null, x = 0, y = 0;
+    view.addEventListener('pointerdown', e => { if (!lifted || (e.pointerType === 'mouse' && e.button !== 0)) return; id = e.pointerId; x = e.clientX; y = e.clientY; view.setPointerCapture(id); view.classList.add('drag'); });
+    view.addEventListener('pointermove', e => {
+      if (e.pointerId !== id) return;
+      const k = 3.2 / view.clientWidth, dx = (e.clientX - x) * k, dy = e.pointerType === 'mouse' ? (e.clientY - y) * k * 0.6 : 0; x = e.clientX; y = e.clientY;
+      if (dx || dy) { post({ type: 'rotate', dx, dy }); hint.classList.add('gone'); }
+    });
+    const end = e => { if (e.pointerId === id) { id = null; view.classList.remove('drag'); } };
+    view.addEventListener('pointerup', end); view.addEventListener('pointercancel', end);
+  }
+  document.addEventListener('visibilitychange', () => { if (lifted) post({ type: 'pause', on: document.hidden || covered }); });
+
+  // intro finished (or skipped): panes switch to a slow float; scroll unlocks now (no 3D) or when the hero lifts
+  const finish = () => {
+    introDone = true; body.classList.add('done'); panes.classList.add('settle');
+    if (body.classList.contains('has3d')) maybeLift(); else body.classList.remove('locked');
+  };
+  const timer = setTimeout(finish, 4600);
+  document.getElementById('skip').addEventListener('click', () => { clearTimeout(timer); body.classList.add('instant'); finish(); });
+  if (reduced) { clearTimeout(timer); finish(); }
+  // the 3D failed while the visitor waits on the finished hero → unlock
+  if (gl) setTimeout(() => { if (!lifted) { body.classList.remove('locked'); } }, 40100);
+</script>
+</body>
+</html>
