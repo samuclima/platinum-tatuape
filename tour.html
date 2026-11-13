@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<title>Apartamento 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root { --panel: rgba(12,18,40,.78); --text: #eef2ff; --accent: #e23b3b; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1230; font-family: system-ui, Segoe UI, sans-serif; color: var(--text); }
+  canvas#view { display: block; }
+  #overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(8,12,30,.72); z-index: 10; cursor: pointer; }
+  #overlay .card { background: var(--panel); border: 1px solid rgba(255,255,255,.15); border-radius: 14px; padding: 28px 34px; max-width: 460px; text-align: center; }
+  #overlay h1 { margin: 0 0 6px; font-size: 26px; }
+  #overlay h1 b { color: #fff; }
+  #overlay p { margin: 6px 0; opacity: .85; line-height: 1.5; }
+  #overlay .keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; text-align: left; margin: 16px auto 18px; width: max-content; }
+  kbd { background: #1d2754; border: 1px solid #3a4785; border-radius: 5px; padding: 1px 7px; font-size: 13px; }
+  #overlay .go { display: inline-block; margin-top: 4px; padding: 10px 22px; background: var(--accent); border-radius: 8px; font-weight: 600; }
+  #overlay .go.loading { background: #3a4785; opacity: .8; }
+  #overlay.loading { cursor: progress; }
+  #hud { position: fixed; left: 16px; top: 16px; background: var(--panel); padding: 10px 14px; border-radius: 10px; font-size: 14px; z-index: 5; pointer-events: none; }
+  #hud .room { font-size: 18px; font-weight: 700; }
+  #hud .dim { opacity: .75; }
+  #hud .ill { margin-top: 4px; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; opacity: .6; }
+  #map { position: fixed; right: 16px; bottom: 16px; background: var(--panel); border-radius: 10px; padding: 8px; z-index: 5; }
+  #cross { position: fixed; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: rgba(255,255,255,.7); z-index: 5; pointer-events: none; }
+  #help { position: fixed; left: 16px; bottom: 16px; background: var(--panel); padding: 8px 12px; border-radius: 10px; font-size: 12px; opacity: .85; z-index: 5; }
+  body.clean #hud, body.clean #map, body.clean #cross, body.clean #help, body.clean #osm, body.clean .ui { display: none !important; }   /* H: clean frame for screenshots */
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="cross"></div>
+<div id="hud"><div class="room" id="roomName">—</div><div class="dim" id="roomDim"></div><div class="dim" id="scaleInfo"></div><div class="dim ill">Perspectiva ilustrativa</div></div>
+<canvas id="map" width="260" height="225"></canvas>
+<div id="osm" style="position:fixed;right:16px;top:12px;font-size:11px;opacity:.75;z-index:5;background:var(--panel);padding:3px 8px;border-radius:6px">Neighbourhood: Rua Platina, Tatuapé · map data © <a href="https://www.openstreetmap.org/copyright" style="color:#9fc0ff" target="_blank">OpenStreetMap</a> contributors</div>
+<div id="help"><kbd>WASD</kbd> walk · <kbd>Shift</kbd> run · <kbd>V</kbd> top view · <kbd>M</kbd> map · <kbd>L</kbd> lights · <kbd>G</kbd> quality · <kbd>+</kbd>/<kbd>-</kbd> scale · <kbd>wheel</kbd> FOV · <kbd>0</kbd> reset · <kbd>F</kbd> free camera · <kbd>H</kbd> hide UI · <kbd>Esc</kbd> pause</div>
+<div id="overlay">
+  <div class="card">
+    <h1></h1>
+    <p class="lead"></p>
+    <div class="keys">
+      <kbd>W A S D</kbd><span>Walk (or arrow keys)</span>
+      <kbd>Mouse</kbd><span>Look around</span>
+      <kbd>Shift</kbd><span>Run</span>
+      <kbd>V</kbd><span>Toggle top-down overview</span>
+      <kbd>M</kbd><span>Aerial view of the neighbourhood with map pins</span>
+      <kbd>L</kbd><span>Toggle interior lights</span>
+      <kbd>G</kbd><span>Quality: High → Ultra (reflections, bloom, supersampling – strong PC) → Basic</span>
+      <kbd>+ / -</kbd><span>Enlarge / shrink apartment (1.00 = real size)</span>
+      <kbd>Wheel</kbd><span>Field of view</span>
+      <kbd>0</kbd><span>Reset to real size</span>
+      <kbd>F</kbd><span>Free camera: fly through walls (E / Space up, Q / C down, Alt slow)</span>
+      <kbd>H</kbd><span>Hide / show the interface (for screenshots)</span>
+      <kbd>Esc</kbd><span>Pause / release mouse</span>
+    </div>
+    <span class="go loading" id="go">Loading…</span>
+  </div>
+</div>
+
+<script>
+  // If loading fails, say why and how to open the site correctly – never sit on "Loading…" forever.
+  (function () {
+    var HOW = 'Open the site by double-clicking <b>start.bat</b> in the <b>site</b> folder (or run <kbd>npm run dev</kbd> there).' +
+      '<br>Using VS Code Live Server? Open <b>dist/index.html</b> instead – the ready-built copy of the site.';
+    function fail(msg) {
+      var go = document.getElementById('go');
+      if (!go || !go.classList.contains('loading')) return;           // already loaded – not our problem
+      go.outerHTML = '<p style="color:#ffb4b4;line-height:1.5">Could not load the apartment.<br>' + HOW +
+        (msg ? '<br><small style="opacity:.7">' + String(msg).replace(/</g, '&lt;') + '</small>' : '') + '</p>';
+    }
+    if (location.protocol === 'file:') { fail('Opened as a file – browsers block 3D modules from file://'); return; }
+    addEventListener('error', function (e) { fail(e.message); });
+    addEventListener('unhandledrejection', function (e) { fail(e.reason && e.reason.message || e.reason); });
+    setTimeout(function () { fail('Still not loaded after 90 s'); }, 90000);
+  })();
+</script>
+<script type="module" src="./src/tour.js"></script>
+</body>
+</html>
