@@ -3,6 +3,7 @@
 
 # … except the site itself: the home page, the apartment tours + 3D engine, the 360° building visit
 !/.gitignore
+!/.github/
 !/index.html
 !/tour.html
 !/src/
