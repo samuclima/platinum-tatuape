@@ -7,6 +7,13 @@
 !/index.html
 !/tour.html
 !/src/
+# the 3D models of the apartments and the 1º/2º floors stay local (the site shows their baked 360° images);
+# the térreo + its kits stay, the home page hero flies around it
+/src/apartments/a*.js
+/src/apartments/pav1.js
+/src/apartments/pav1.meta.js
+/src/apartments/pav2.js
+/src/apartments/pav2.meta.js
 !/package.json
 !/package-lock.json
 !/vite.config.js

@@ -781,9 +781,6 @@ export function start(meta) {
   // itself (avoids flicker); pressing G gives the viewer manual control again.
   let embedMode = false;                                       // home-page panel (?embed=orbit)
   let autoLevel = 0, autoOn = true, perfT = 0, perfN = 0, perfStart = performance.now();
-  const autoNote = document.createElement('div');
-  autoNote.style.cssText = 'position:fixed;left:50%;top:14px;transform:translateX(-50%);background:var(--panel);padding:6px 12px;border-radius:8px;font-size:12px;z-index:6;display:none';
-  autoNote.className = 'ui'; document.body.appendChild(autoNote);
   function setResolution(scale) {
     const pr = DPR * scale;
     renderer.setPixelRatio(pr); renderer.setSize(innerWidth, innerHeight);
@@ -793,10 +790,7 @@ export function start(meta) {
   function applyAutoLevel() {
     quality = autoLevel === 0;
     setResolution(autoLevel >= 3 ? 0.6 : autoLevel >= 2 ? 0.75 : 1);
-    const msg = ['', 'contact shadows off', 'resolution 75 %', 'resolution 60 %'][autoLevel];
-    autoNote.textContent = `Performance mode: ${msg} (press G for full quality)`;
-    autoNote.style.display = autoLevel ? 'block' : 'none';
-    clearTimeout(applyAutoLevel.t); applyAutoLevel.t = setTimeout(() => autoNote.style.display = 'none', 6000);
+    // (no on-screen note: the step down happens quietly – the user asked for the "Performance mode" notice to go)
   }
   function autoQuality(rawDt) {
     if (!autoOn || document.hidden || (!embedMode && !document.hasFocus()) || performance.now() - perfStart < 4000 || rawDt > 0.25) { perfT = perfN = 0; return; }  // only measure a focused, visible window after warm-up
@@ -861,7 +855,7 @@ export function start(meta) {
     if (e.code === 'KeyV' && topView) { topCam.position.set(X(meta.top.at[0]) * SCALE, meta.top.height, (Z(meta.top.at[1]) + meta.top.back) * SCALE); orbit.target.set(X(meta.top.at[0]) * SCALE, 0, Z(meta.top.at[1]) * SCALE); orbit.update(); }
     if (e.code === 'KeyL') roomLights.forEach(l => l.visible = !l.visible);
     if (e.code === 'KeyG') {                                   // High → Ultra → Basic → High
-      autoOn = false; autoNote.style.display = 'none';
+      autoOn = false;
       if (autoLevel) { autoLevel = 0; setResolution(1); quality = true; say('Quality: High'); }
       else if (quality && !ultra) { setUltra(true); say('Quality: Ultra'); }
       else if (ultra) { setUltra(false); quality = false; say('Quality: Basic (fast)'); }

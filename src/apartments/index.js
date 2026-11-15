@@ -1,12 +1,14 @@
 // The apartments on the site. Each entry is loaded only when that apartment is opened.
-export const APARTMENTS = {
-  '27': { meta: () => import('./a27.meta.js'), build: () => import('./a27.js') },
-  '33': { meta: () => import('./a33.meta.js'), build: () => import('./a33.js') },
-  '61': { meta: () => import('./a61.meta.js'), build: () => import('./a61.js') },
-  '79': { meta: () => import('./a79.meta.js'), build: () => import('./a79.js') },
-  '93': { meta: () => import('./a93.meta.js'), build: () => import('./a93.js') },
-  '93s': { meta: () => import('./a93s.meta.js'), build: () => import('./a93s.js') },   // 93 m² without Dorm. 02
-  terreo: { meta: () => import('./terreo.meta.js'), build: () => import('./terreo.js') },
-  pav1: { meta: () => import('./pav1.meta.js'), build: () => import('./pav1.js') },
-  pav2: { meta: () => import('./pav2.meta.js'), build: () => import('./pav2.js') },
+// Only the models present on disk are listed: the apartment and 1º/2º floor models are kept out of git (.gitignore),
+// so the published build (GitHub Pages) has just the térreo, which the home page hero uses. Locally all of them
+// build, for the bake tools.
+const meta = import.meta.glob('./*.meta.js');
+const build = import.meta.glob(['./*.js', '!./*.meta.js', '!./*Kit.js', '!./index.js']);
+const FILES = {
+  '27': 'a27', '33': 'a33', '61': 'a61', '79': 'a79', '93': 'a93',
+  '93s': 'a93s',   // 93 m² without Dorm. 02
+  terreo: 'terreo', pav1: 'pav1', pav2: 'pav2',
 };
+export const APARTMENTS = Object.fromEntries(Object.entries(FILES)
+  .filter(([, f]) => meta[`./${f}.meta.js`] && build[`./${f}.js`])
+  .map(([id, f]) => [id, { meta: meta[`./${f}.meta.js`], build: build[`./${f}.js`] }]));

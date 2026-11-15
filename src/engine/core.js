@@ -265,7 +265,7 @@ export const M = {
 // GEOMETRY HELPERS
 // ---------------------------------------------------------------------------
 export const colliders = [];       // {x0,x1,z0,z1} in metres
-export const planLines = { walls: [], glass: [] };   // [x0,z0,x1,z1] in metres: full-height wall pieces + window panes (home page's line plan, tools/bake_pano.mjs)
+export const planLines = { walls: [], glass: [], rail: [] };   // [x0,z0,x1,z1] in metres: full-height wall pieces + window panes + terrace railings (home page's line plan, tools/bake_pano.mjs)
 export const world = new THREE.Group(); scene.add(world);
 export const ceilingGroup = new THREE.Group(); world.add(ceilingGroup);
 
@@ -324,8 +324,9 @@ export function wall(ax, az, bx, bz, openings = [], mat = M.wall, h = H) {
   }
   if (cur < s1) solid(cur, s1);
 }
+const logRail = (ax, az, bx, bz) => planLines.rail.push([X(Math.min(ax, bx)), Z(Math.min(az, bz)), X(Math.max(ax, bx)), Z(Math.max(az, bz))]);   // the terrace's open edge, for the line plan
 export function railing(ax, az, bx, bz) {
-  const c = (az + bz) / 2;
+  const c = (az + bz) / 2; logRail(ax, az, bx, bz);
   box(ax, c - 1, bx, c + 1, 0, 1.1, M.glass, { collide: true, cast: false });
   box(ax, c - 2, bx, c + 2, 1.1, 1.15, M.steel, { collide: false });
 }
@@ -1680,7 +1681,7 @@ export function towelRail(px, pz, alongX, out) {         // black rail + towel o
   }
 }
 export function railingBars(ax, az, bx, bz) {            // low white curb + black vertical bars (render)
-  const c = (az + bz) / 2, z = Z(c), x0 = X(ax), x1 = X(bx), n = Math.floor((x1 - x0) / 0.1);
+  const c = (az + bz) / 2, z = Z(c), x0 = X(ax), x1 = X(bx), n = Math.floor((x1 - x0) / 0.1); logRail(ax, az, bx, bz);
   box(ax, az, bx, bz, 0, 0.14, M.wall);
   const im = new THREE.InstancedMesh(new THREE.BoxGeometry(0.018, 0.96, 0.018), P.railBlack, n), m4 = new THREE.Matrix4();
   for (let i = 0; i < n; i++) im.setMatrixAt(i, m4.makeTranslation(x0 + 0.05 + i * 0.1, 0.14 + 0.48, z));

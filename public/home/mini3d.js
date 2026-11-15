@@ -3,7 +3,7 @@
 // one frame (tower centre, street level), level 0 sets the framing. A level can be lifted (it flies in from above)
 // and faded towards white (context under the active level); only the active level reports its points.
 //   const v = await mini3d(canvas, { urls: [...], onFrame(spots) })   spots: [{ id, x, y, front }] in CSS px
-//   v.set({ lift: [0, 30], fade: [0, 0], active: 0 })   v.focus(id | null)
+//   v.set({ lift: [0, 30], fade: [0, 0], active: 0 })   v.focus(id | null)   v.pick(id)   v.tint(id | null)
 async function loadBin(url) {
   if ('DecompressionStream' in window) try {
     const r = await fetch(url + '.gz'); if (!r.ok) throw 0;
@@ -142,6 +142,12 @@ export async function mini3d(canvas, { urls, url, onFrame, yaw = 0, pitch = 0.62
       const s = layers[active]?.head.spots.find(q => q.id === id);
       fid = s?.r ? id : null;
       if (s) { gx = s.p[0] - C[0]; gz = s.p[2] - C[2]; gk = zoom; gp = 0.92; gy = 0.28; if (s.r) { sel = boxes(s.r); gso = 1; } } else { gx = gz = 0; gk = 1; gp = pitch; gy = 0; gso = 0; }   // closer, tilted ≈ 53° and turned a little
+      kick();
+    },
+    pick(id) {                                                            // the place on show: in colour, the camera stays on the whole plan (straight top view)
+      const s = layers[active]?.head.spots.find(q => q.id === id);
+      fid = s?.r ? id : null; gx = gz = 0; gk = 1; gp = pitch; gy = 0;
+      if (s?.r) { sel = boxes(s.r); gso = 1; } else gso = 0;
       kick();
     },
     tint(id) {                                                            // hover: colour only that place, camera stays (null = back to the clicked one, or none)

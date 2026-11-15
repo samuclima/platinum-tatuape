@@ -131,11 +131,11 @@ export async function pano(el, { base, onReady } = {}) {
 // line plan of the apartment (walls as thin strokes, window panes as hairlines), one dot per photo point – click a dot to
 // go there; the current point carries a cone showing where you look. World x → right, z → down (same frame as the bake).
 function planMap(el, data, onPick) {
-  const { box: [x0, z0, x1, z1], walls, glass } = data.plan, w = x1 - x0, h = z1 - z0, NS = 'http://www.w3.org/2000/svg';
+  const { box: [x0, z0, x1, z1], walls, glass, rail = [] } = data.plan, w = x1 - x0, h = z1 - z0, NS = 'http://www.w3.org/2000/svg';
   const wrap = document.createElement('div'); wrap.className = 'pv-map';
   const r = a => `<rect x="${(a[0] - x0).toFixed(2)}" y="${(a[1] - z0).toFixed(2)}" width="${(a[2] - a[0]).toFixed(2)}" height="${(a[3] - a[1]).toFixed(2)}"/>`;
   wrap.innerHTML = `<svg viewBox="0 0 ${w.toFixed(2)} ${h.toFixed(2)}" aria-label="Planta">
-    <g class="pv-map-glass">${glass.map(r).join('')}</g><g class="pv-map-walls">${walls.map(r).join('')}</g>
+    <g class="pv-map-glass">${glass.map(r).join('')}</g><g class="pv-map-rail">${rail.map(r).join('')}</g><g class="pv-map-walls">${walls.map(r).join('')}</g>
     <path class="pv-map-cone" d=""/><g class="pv-map-pts"></g></svg>`;
   const svg = wrap.firstElementChild, cone = svg.querySelector('.pv-map-cone'), pts = svg.querySelector('.pv-map-pts');
   const dots = data.points.map((p, i) => {
