@@ -3,7 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="icon" href="data:," />
+<link rel="icon" href="favicon.ico" sizes="48x48" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="manifest" href="site.webmanifest" />
+<meta name="robots" content="noindex" />
 <title>Apartamento 3D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -37,7 +41,7 @@
 <div id="cross"></div>
 <div id="hud"><div class="room" id="roomName">—</div><div class="dim" id="roomDim"></div><div class="dim" id="scaleInfo"></div><div class="dim ill">Perspectiva ilustrativa</div></div>
 <canvas id="map" width="260" height="225"></canvas>
-<div id="osm" style="position:fixed;right:16px;top:12px;font-size:11px;opacity:.75;z-index:5;background:var(--panel);padding:3px 8px;border-radius:6px">Neighbourhood: Rua Platina, Tatuapé · map data © <a href="https://www.openstreetmap.org/copyright" style="color:#9fc0ff" target="_blank">OpenStreetMap</a> contributors</div>
+<div id="osm" style="position:fixed;right:16px;top:12px;font-size:11px;opacity:.75;z-index:5;background:var(--panel);padding:3px 8px;border-radius:6px">Neighbourhood: Rua Platina, Tatuapé · map data © <a href="https://www.openstreetmap.org/copyright" style="color:#9fc0ff" target="_blank" rel="noopener">OpenStreetMap</a> contributors</div>
 <div id="help"><kbd>WASD</kbd> walk · <kbd>Shift</kbd> run · <kbd>V</kbd> top view · <kbd>M</kbd> map · <kbd>L</kbd> lights · <kbd>G</kbd> quality · <kbd>+</kbd>/<kbd>-</kbd> scale · <kbd>wheel</kbd> FOV · <kbd>0</kbd> reset · <kbd>F</kbd> free camera · <kbd>H</kbd> hide UI · <kbd>Esc</kbd> pause</div>
 <div id="overlay">
   <div class="card">

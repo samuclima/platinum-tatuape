@@ -1,0 +1,14 @@
+{
+  "name": "Platinum Tatuapé by Diálogo",
+  "short_name": "Platinum Tatuapé",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "display": "browser",
+  "background_color": "#151c3a",
+  "theme_color": "#151c3a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

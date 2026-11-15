@@ -4,8 +4,26 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#151c3a" />
-<link rel="icon" href="data:," />
-<title>Platinum Tatuapé</title>
+<link rel="icon" href="favicon.ico" sizes="48x48" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="manifest" href="site.webmanifest" />
+<title>Platinum Tatuapé by Diálogo | Lançamento no Tatuapé, São Paulo</title>
+<meta name="description" content="Lançamento Platinum Tatuapé by Diálogo: studios e apartamentos de 27 a 93 m², com 2 e 3 dorms e suíte, na Praça Heitor Levi. Faça o tour 3D das plantas e a visita 360° ao lazer." />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<link rel="canonical" href="https://lancamentoplatinum.com.br/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Platinum Tatuapé" />
+<meta property="og:locale" content="pt_BR" />
+<meta property="og:url" content="https://lancamentoplatinum.com.br/" />
+<meta property="og:title" content="Platinum Tatuapé by Diálogo | Lançamento no Tatuapé, São Paulo" />
+<meta property="og:description" content="Lançamento Platinum Tatuapé by Diálogo: studios e apartamentos de 27 a 93 m², com 2 e 3 dorms e suíte, na Praça Heitor Levi. Faça o tour 3D das plantas e a visita 360° ao lazer." />
+<meta property="og:image" content="https://lancamentoplatinum.com.br/og.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Fachada do Platinum Tatuapé by Diálogo" />
+<meta name="twitter:card" content="summary_large_image" />
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://lancamentoplatinum.com.br/#site","url":"https://lancamentoplatinum.com.br/","name":"Platinum Tatuapé","alternateName":["Lançamento Platinum Tatuapé","Platinum Tatuapé by Diálogo"],"inLanguage":"pt-BR"},{"@type":"ApartmentComplex","@id":"https://lancamentoplatinum.com.br/#empreendimento","name":"Platinum Tatuapé by Diálogo","alternateName":"Lançamento Platinum Tatuapé","description":"Lançamento Platinum Tatuapé by Diálogo: studios e apartamentos de 27 a 93 m², com 2 e 3 dorms e suíte, na Praça Heitor Levi. Faça o tour 3D das plantas e a visita 360° ao lazer.","url":"https://lancamentoplatinum.com.br/","image":["https://lancamentoplatinum.com.br/og.jpg","https://lancamentoplatinum.com.br/home/feel/fachada.jpg"],"address":{"@type":"PostalAddress","streetAddress":"Praça Heitor Levi","addressLocality":"São Paulo","addressRegion":"SP","addressCountry":"BR"},"telephone":"+55-11-94394-7783","email":"dabramo@lancamentoplatinum.com.br","brand":{"@type":"Organization","name":"Diálogo Engenharia"},"amenityFeature":[{"@type":"LocationFeatureSpecification","name":"Piscina adulto","value":true},{"@type":"LocationFeatureSpecification","name":"Lobby com pé-direito duplo","value":true},{"@type":"LocationFeatureSpecification","name":"Coworking","value":true},{"@type":"LocationFeatureSpecification","name":"Casa de campo","value":true},{"@type":"LocationFeatureSpecification","name":"Deck com spa","value":true},{"@type":"LocationFeatureSpecification","name":"Pet place","value":true}]}]}</script>
 <link rel="preload" as="image" href="home/bg.jpg" media="(min-width: 700px)" />
 <link rel="preload" as="image" href="home/bg-960.jpg" media="(max-width: 699px)" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -158,12 +176,23 @@
     text-transform: uppercase; color: var(--purple-dim); opacity: var(--p); }
   .feel .cap b { font-weight: 700; color: var(--purple); }
   .feel.leaving .cap { opacity: 0; transition: opacity .3s; }
+  /* "keep scrolling" pill at the foot of the pinned words (all screens): first click opens the picture, the next goes on to the levels */
+  .feel-go { position: absolute; left: 50%; bottom: clamp(18px, 4vh, 40px); transform: translateX(-50%); background: var(--purple); color: #fff; border-color: transparent;
+    opacity: 0; visibility: hidden; transition: opacity .4s, visibility 0s .4s, background .25s, color .25s; }
+  .feel-go i { background: #fff; color: var(--purple); }
+  .panel.show .feel-go { opacity: 1; visibility: visible; transition: opacity .6s .9s, visibility 0s, background .25s, color .25s; }
+  .panel.show .feel.leaving .feel-go { opacity: 0; visibility: hidden; transition: opacity .3s, visibility 0s .3s; }
+  .feel-go:focus-visible { outline: 2px solid var(--purple); outline-offset: 3px; }
+  @media (min-width: 701px) and (min-aspect-ratio: 4/5) { .feel .cap { bottom: calc(clamp(18px, 4vh, 40px) + 62px); } }   /* the caption sits above the pill */
+  @media (min-width: 701px) and (min-aspect-ratio: 4/5) and (max-height: 820px) { .duo { --gh: 37vh; } }   /* short laptops: room for caption + pill */
   .panel.show .feel .kicker { opacity: 1; }
   .panel.show .duo .w > span { transform: none; }
   @media (max-width: 700px), (max-aspect-ratio: 4/5) {                /* phones: each line may wrap in two */
     .duo { --gw: 84vw; --gh: min(36vh, 340px); font-size: clamp(36px, 11.5vw, 64px); line-height: .98; white-space: normal; }
     .duo .w { max-width: 92vw; }
     .feel .cap { bottom: 88px; }   /* clear of the WhatsApp button */
+    .feel-go { bottom: max(18px, calc(env(safe-area-inset-bottom) + 8px)); padding: 6px 6px 6px 16px; gap: 10px; font-size: 11px; letter-spacing: .12em; }
+    .feel-go i { width: 30px; height: 30px; }
   }
   /* magazine spread: picture on one side, the text set low on the opposite one */
   .mag { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(12px, 2vw, 28px); align-items: center; align-content: center;
@@ -633,7 +662,7 @@
       <path class="ring" d="M950.1-772.3v4.2h9.9c6.9,0,12.6,5.6,12.6,12.6c0,6.9-5.6,12.6-12.6,12.6h-9.9v4.2h9.9 c9.2,0,16.7-7.5,16.7-16.7c0-9.2-7.5-16.7-16.7-16.7H950.1z" />
       <path class="core" fill="url(#silver)" d="M956.3-764.5h-2.5h-3.7v17.8h9.9c4.9,0,8.9-4,8.9-8.9c0-4.9-4-8.9-8.9-8.9H956.3z" />
     </svg>
-    <h1 class="word"><span class="vh">Platinum – Tatuapé by Diálogo</span></h1>
+    <h1 class="word"><span class="vh">Platinum Tatuapé by Diálogo</span></h1>
     <p class="tagline">Studios e apartamentos de 2 e 3 dorms com suíte.</p>
   </div>
 
@@ -644,7 +673,7 @@
   </div>
 </header>
 
-<section class="scene" id="scene" aria-label="Platinum Tatuapé em 3D">
+<section class="scene" id="scene" role="main" aria-label="Platinum Tatuapé: o empreendimento, as plantas e a visita 360°">
   <div class="view">
     <iframe id="three" title="Platinum em 3D – vista 360°" tabindex="-1" aria-hidden="true"></iframe>
     <p class="ill-tag ill-hero">Perspectiva ilustrativa</p>
@@ -660,15 +689,16 @@
         <h2 class="duo" aria-label="Lançamento Platinum Tatuapé by Diálogo">
           <span class="w" aria-hidden="true"><span style="--i:0">Lançamento Platinum</span></span>
           <span class="gap" aria-hidden="true"><span class="frame" id="frame">
-            <img class="on" alt="" decoding="async" data-src="home/feel/fachada.jpg" data-cap="Fachada" style="object-position:50% 38%" />
-            <img alt="" decoding="async" data-src="home/feel/piscina.jpg" data-cap="Piscina adulto" />
-            <img alt="" decoding="async" data-src="home/feel/lobby.jpg" data-cap="Lobby" style="object-position:62% 50%" />
-            <img alt="" decoding="async" data-src="home/feel/terraco.jpg" data-cap="Terraço do apto. 93 m²" style="object-position:70% 50%" />
-            <img alt="" decoding="async" data-src="home/feel/living.jpg" data-cap="Living do apto. 93 m²" />
+            <img class="on" alt="Fachada do Platinum Tatuapé – perspectiva ilustrada" decoding="async" data-src="home/feel/fachada.jpg" data-cap="Fachada" style="object-position:50% 38%" />
+            <img alt="Piscina adulto do Platinum Tatuapé – perspectiva ilustrada" decoding="async" data-src="home/feel/piscina.jpg" data-cap="Piscina adulto" />
+            <img alt="Lobby do Platinum Tatuapé – perspectiva ilustrada" decoding="async" data-src="home/feel/lobby.jpg" data-cap="Lobby" style="object-position:62% 50%" />
+            <img alt="Terraço do apartamento de 93 m² do Platinum Tatuapé – perspectiva ilustrada" decoding="async" data-src="home/feel/terraco.jpg" data-cap="Terraço do apto. 93 m²" style="object-position:70% 50%" />
+            <img alt="Living do apartamento de 93 m² do Platinum Tatuapé – perspectiva ilustrada" decoding="async" data-src="home/feel/living.jpg" data-cap="Living do apto. 93 m²" />
           </span></span>
           <span class="w" aria-hidden="true"><span style="--i:1">Tatuapé by Diálogo</span></span>
         </h2>
         <p class="cap" aria-hidden="true">Perspectiva ilustrada · <b id="capName">Fachada</b></p>
+        <button class="hint-b feel-go" id="feelGo" type="button">Role para baixo <i><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg></i></button>
       </div>
     </div>
     <section class="stack" id="stack"><div class="mag" id="mag">
@@ -847,6 +877,9 @@
     shots[shot].classList.remove('on'); shot = (shot + 1) % shots.length; next.classList.add('on'); capName.textContent = next.dataset.cap;
   }, 2800);
   addEventListener('resize', openGap);
+  document.getElementById('feelGo').addEventListener('click', () => {   // picture still closed → open it; open → on to the levels
+    const r = feel.getBoundingClientRect(), top = r.top + scrollY;
+    scrollTo({ top: gapP < 0.98 ? top + (r.height - innerHeight) * 0.6 : top + r.height, behavior: reduced ? 'auto' : 'smooth' }); document.getElementById('feelGo').blur(); });
   // the little levels: baked models (tools/bake_mini.mjs, ~110 + 40 KB) drawn by home/mini3d.js, fetched only when the
   // block comes close. The block stays pinned while the page scrolls: the 1º pavimento comes down onto the térreo, where
   // it really sits, and the text and the numbered points switch to it. A point opens its render + a few words.

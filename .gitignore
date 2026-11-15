@@ -25,6 +25,17 @@
 !/public/home/
 !/public/visita/
 !/public/data/
+# favicon set, share image, and what search engines read
+!/public/favicon.svg
+!/public/favicon.ico
+!/public/apple-touch-icon.png
+!/public/icon-192.png
+!/public/icon-512.png
+!/public/icon-maskable-512.png
+!/public/site.webmanifest
+!/public/og.jpg
+!/public/robots.txt
+!/public/sitemap.xml
 # (the old brochure page is ignored; the visit's loading screen uses one of its images)
 !/public/platinum/
 /public/platinum/*
