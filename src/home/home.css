@@ -379,8 +379,9 @@ body:not(.has3d) .scene .view { display: none; }
   max-width: min(1500px, 88vw); margin: 0 auto; padding: 0 clamp(20px, 6vw, 96px); box-sizing: border-box; }
 .say-k { margin: 0 0 clamp(18px, 2.4vw, 36px); font-size: clamp(11px, .8vw, 15px); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--say-ink); opacity: .66; }
 .say-t { margin: 0; font-weight: 300; font-size: clamp(34px, 5.2vw, 104px); line-height: 1.08; letter-spacing: -.035em; max-width: 17em; color: #c9c5d1; }
+.say-t { text-wrap: balance; }
 .say-t b { font-weight: 700; }
-.say-p { margin-top: clamp(22px, 3.4vh, 40px); max-width: 60ch; }
+.say-p { margin-top: clamp(22px, 3.4vh, 40px); max-width: 80ch; }
 .say-p p { margin: 0 0 .9em; font-size: clamp(15px, 1.15vw, 18px); line-height: 1.7; color: rgba(42, 26, 85, .78); }
 .say-p strong { color: #2a1a55; font-weight: 700; }
 .say-p a { color: #4b2a8f; font-weight: 600; text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat; padding-bottom: 1px; transition: background-size .45s cubic-bezier(.22, .9, .24, 1); }
