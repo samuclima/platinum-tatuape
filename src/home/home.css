@@ -382,7 +382,7 @@ body:not(.has3d) .scene .view { display: none; }
 .say-t { text-wrap: balance; }
 .say-t b { font-weight: 700; }
 .say-p { margin-top: clamp(22px, 3.4vh, 40px); max-width: 80ch; }
-.say-p p { margin: 0 0 .9em; font-size: clamp(15px, 1.15vw, 18px); line-height: 1.7; color: rgba(42, 26, 85, .78); }
+.say-p p { margin: 0 0 .9em; text-wrap: pretty; font-size: clamp(15px, 1.15vw, 18px); line-height: 1.7; color: rgba(42, 26, 85, .78); }
 .say-p strong { color: #2a1a55; font-weight: 700; }
 .say-p a { color: #4b2a8f; font-weight: 600; text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat; padding-bottom: 1px; transition: background-size .45s cubic-bezier(.22, .9, .24, 1); }
 .say-p a:hover, .say-p a:focus-visible { background-size: 0 1px; background-position: 100% 100%; outline: none; }
