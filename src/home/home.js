@@ -453,3 +453,10 @@ document.getElementById('skip').addEventListener('click', () => { clearTimeout(t
 if (reduced) { clearTimeout(timer); finish(); }
 // the 3D failed while the visitor waits on the finished hero → unlock
 if (gl) setTimeout(() => { if (!lifted) { body.classList.remove('locked'); } }, 40100);
+
+// the info section: each block rises in once it enters the view, siblings staggered
+{ const els = [...document.querySelectorAll('.ix [data-rv]')];
+  const groups = new Map(); els.forEach(el => { const k = el.parentElement; groups.set(k, (groups.get(k) || 0) + 1); el.style.setProperty('--rv', groups.get(k) - 1); });
+  if (!('IntersectionObserver' in window)) els.forEach(el => el.classList.add('in'));
+  else { const o = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); o.unobserve(e.target); } }, { rootMargin: '0px 0px -10% 0px' });
+    els.forEach(el => o.observe(el)); } }
