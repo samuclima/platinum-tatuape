@@ -763,6 +763,7 @@ a.ct-card-wa:hover, a.ct-card-wa:focus-visible { background: #3ee07d; border-col
 .ix { --hair: rgba(255, 255, 255, .14); --dim: rgba(226, 236, 255, .62); --cy: rgba(160, 215, 255, .9);
   position: relative; padding: clamp(28px, 5vh, 64px) clamp(20px, 6vw, 100px) clamp(24px, 5vh, 60px); color: #fff; }
 .ix-wrap { max-width: 1320px; margin: 0 auto; }
+.ix-rest .ix-grid { margin-top: 0; }   /* the numbers sit above the contact, the rest below it */
 .ix-k { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .26em; text-transform: uppercase; color: var(--cy); }
 .ix-head { display: grid; gap: clamp(18px, 3vh, 28px); }
 .ix-head .ix-k { grid-column: 1 / -1; }
@@ -772,7 +773,7 @@ a.ct-card-wa:hover, a.ct-card-wa:focus-visible { background: #3ee07d; border-col
   background-image: linear-gradient(100deg, #fff 0%, #d9dde3 30%, #fff 48%, #c2c7cf 70%, #eef0f3 100%); background-size: 220% 100%; animation: ixShine 7s ease-in-out infinite; }
 @keyframes ixShine { 0%, 100% { background-position: 0 0; } 50% { background-position: 100% 0; } }
 
-.ix-stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--hair); }
+.ix-stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); }
 .ix-stats li { padding: clamp(20px, 3vh, 34px) clamp(12px, 2vw, 28px) 0 0; border-right: 1px solid var(--hair); }
 .ix-stats li + li { padding-left: clamp(16px, 2vw, 28px); }
 .ix-stats li:last-child { border-right: 0; }
