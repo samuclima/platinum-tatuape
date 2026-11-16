@@ -774,17 +774,17 @@ a.ct-card-wa:hover, a.ct-card-wa:focus-visible { background: #3ee07d; border-col
 @media (max-width: 380px) { .stack-go { padding-left: 14px; font-size: 10.5px; letter-spacing: .1em; } }   /* very narrow phones: clear of the WhatsApp button */
 .info-copy .info-pl { margin-top: .6em; gap: 6px 20px; } .info-pl a { font-size: 14px; font-weight: 500; border-bottom-color: rgba(160, 215, 255, .35); }   /* one link per plan page */
 
-/* location · leisure · specs: one row under the info columns (SEO content, same type scale as the FAQ) */
-.info-more { max-width: 1240px; margin: clamp(40px, 7vh, 80px) auto 0; padding-top: clamp(28px, 5vh, 48px); border-top: 1px solid rgba(255, 255, 255, .16); display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(28px, 4vw, 64px); }
-.im-col .info-h { margin-bottom: 16px; }
-.im-list, .im-tags { list-style: none; margin: 0; padding: 0; }
-.im-list li { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, .1); font-size: 15px; color: rgba(255, 255, 255, .8); }
+/* the info section: inline plan links, the location list under the intro, one quiet specs row */
+.info-copy p a { color: #fff; text-decoration: none; border-bottom: 1px solid rgba(160, 215, 255, .5); transition: border-color .25s; }
+.info-copy p a:hover, .info-copy p a:focus-visible { border-color: #fff; outline: none; }
+.info-copy .info-loc { margin: clamp(26px, 4vh, 40px) 0 6px; }
+.im-list { list-style: none; margin: 0; padding: 0; max-width: 52ch; }
+.im-list li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid rgba(255, 255, 255, .1); font-size: 15px; color: rgba(255, 255, 255, .78); }
 .im-list b { font-weight: 600; color: #fff; white-space: nowrap; }
-.im-note { margin: 10px 0 0; font-size: 12px; color: rgba(255, 255, 255, .5); }
-.im-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-.im-tags li { padding: 7px 13px; border: 1px solid rgba(160, 215, 255, .3); border-radius: 999px; font-size: 13.5px; color: rgba(255, 255, 255, .85); }
-.im-dl { margin: 0; }
-.im-dl div { display: grid; grid-template-columns: 8.5em 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, .1); font-size: 15px; }
-.im-dl dt { color: rgba(255, 255, 255, .6); } .im-dl dd { margin: 0; color: #fff; font-weight: 500; }
-@media (max-width: 1000px) { .info-more { grid-template-columns: 1fr 1fr; } .info-more .im-col:last-child { grid-column: 1 / -1; } }
-@media (max-width: 700px) { .info-more { grid-template-columns: 1fr; margin-top: 36px; } .im-dl div { grid-template-columns: 9.5em 1fr; } }
+.im-note { margin: 10px 0 0; font-size: 12px; color: rgba(255, 255, 255, .45); }
+.info-spec { max-width: 1240px; margin: clamp(44px, 8vh, 90px) auto 0; padding-top: clamp(24px, 4vh, 36px); border-top: 1px solid rgba(255, 255, 255, .14); }
+.info-spec dl { margin: 14px 0 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px clamp(20px, 3vw, 48px); }
+.info-spec dt { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255, 255, 255, .5); }
+.info-spec dd { margin: 4px 0 0; font-size: 15px; font-weight: 500; color: #fff; }
+.foot-ck { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
+@media (max-width: 900px) { .info-spec dl { grid-template-columns: 1fr 1fr; } }

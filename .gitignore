@@ -37,6 +37,8 @@
 !/public/og.jpg
 !/public/robots.txt
 !/public/sitemap.xml
+!/public/consent.js
+!/public/privacidade/
 # (the old brochure page is ignored; the visit's loading screen uses one of its images)
 !/public/platinum/
 /public/platinum/*

@@ -28,7 +28,16 @@ addEventListener('resize', () => { const w = hero.clientWidth, n = w < 480 ? 5 :
 // Scrolling slides the text panel over it. No WebGL / load failure / 40 s timeout → the plain page (hero, then tours).
 const body = document.body, sceneEl = document.getElementById('scene'), frame = document.getElementById('three'), hint = document.getElementById('hint'), panel = document.getElementById('panel');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const gl = (() => { try { return !!document.createElement('canvas').getContext('webgl2'); } catch { return false; } })();
+// 3D only on a real GPU: software WebGL (SwiftShader / llvmpipe: Lighthouse, Googlebot, PCs without a GPU driver),
+// Data Saver and very weak phones get the plain page – the 3D city would freeze them
+const gl = (() => { try {
+  const c = document.createElement('canvas').getContext('webgl2'); if (!c) return false;
+  const ext = c.getExtension('WEBGL_debug_renderer_info'), r = ext ? String(c.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
+  c.getExtension('WEBGL_lose_context')?.loseContext();
+  if (/swiftshader|llvmpipe|softpipe|software|basic render/i.test(r)) return false;
+  if (navigator.connection?.saveData) return false;
+  if ((navigator.deviceMemory && navigator.deviceMemory < 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 3)) return false;
+  return true; } catch { return false; } })();
 let introDone = false, ready3d = false, lifted = false;
 if (gl) {
   body.classList.add('has3d');
@@ -398,6 +407,7 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
   const fallback = () => { if (fbImg) return; mini.classList.add('nogl'); fbImg = new Image(); fbImg.decoding = 'async'; fbImg.alt = 'Perspectiva ilustrada do Platinum Tatuapé'; fbImg.src = `home/feel/${FB[lv]}.jpg`; mini.prepend(fbImg); const tg = mini.querySelector('.ill-mini'); if (tg) tg.textContent = 'Perspectiva ilustrativa'; };
   new IntersectionObserver((es, o) => {
     if (!es.some(e => e.isIntersecting)) return; o.disconnect();
+    if (!gl) { fallback(); return; }   // same rule as the hero: no 3D without a real GPU
     import(new URL('home/mini3d.js', document.baseURI).href).then(m => m.mini3d(document.getElementById('miniC'), { urls: ['home/terreo-mini.bin', 'home/pav1-mini.bin', 'home/pav2-mini.bin'], yaw: MINI_YAW, pitch: 1.5707,
       onFrame(ps) { ps.forEach((p, k) => { if (!btns[k]) return; btns[k].style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`; btns[k].style.zIndex = (k === cur ? 3000 : 1000) - Math.round(p.front); }); } }))
       .then(v => { view = v; v.set(goals); if (cur >= 0) v.pick(PLACES[cur][0]); mini.classList.add('on'); }).catch(e => { console.error('mini3d:', e); fallback(); });

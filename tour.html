@@ -2,18 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
-<!-- Google tag (GTM-5PR2JMHL) + Meta Pixel – only when this page is opened on its own, not inside the home page (?embed=…) -->
-<script>
-if (!/[?&]embed=/.test(location.search)) {
-  (function (s) { s.async = true; s.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-5PR2JMHL'; document.head.appendChild(s); })(document.createElement('script'));
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = function () { dataLayer.push(arguments); };
-  gtag('js', new Date());
-  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '30063137429964715');
-  fbq('track', 'PageView');
-}
-</script>
+<!-- Google tag (GTM-5PR2JMHL) + Meta Pixel: loaded by consent.js only after the visitor accepts cookies (LGPD) -->
+<script src="/consent.js" defer></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" href="favicon.ico" sizes="48x48" />
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -49,7 +39,6 @@ if (!/[?&]embed=/.test(location.search)) {
 </style>
 </head>
 <body>
-<noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=30063137429964715&ev=PageView&noscript=1" /></noscript>
 <canvas id="view"></canvas>
 <div id="cross"></div>
 <div id="hud"><div class="room" id="roomName">—</div><div class="dim" id="roomDim"></div><div class="dim" id="scaleInfo"></div><div class="dim ill">Perspectiva ilustrativa</div></div>
