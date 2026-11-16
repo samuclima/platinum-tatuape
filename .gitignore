@@ -37,5 +37,9 @@
 !/public/og.jpg
 !/public/robots.txt
 !/public/sitemap.xml
-# the specs / leisure / location page (indexed for SEO) and its images
+# (the old brochure page is ignored; the visit's loading screen uses one of its images)
 !/public/platinum/
+/public/platinum/*
+!/public/platinum/img/
+/public/platinum/img/*
+!/public/platinum/img/lobby.jpg
