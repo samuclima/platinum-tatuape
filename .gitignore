@@ -25,6 +25,7 @@
 !/public/home/
 !/public/visita/
 !/public/data/
+!/public/plantas/
 # favicon set, share image, and what search engines read
 !/public/favicon.svg
 !/public/favicon.ico

@@ -772,3 +772,4 @@ a.ct-card-wa:hover, a.ct-card-wa:focus-visible { background: #3ee07d; border-col
   .say-t { margin: 0 auto; }
 }
 @media (max-width: 380px) { .stack-go { padding-left: 14px; font-size: 10.5px; letter-spacing: .1em; } }   /* very narrow phones: clear of the WhatsApp button */
+.info-copy .info-pl { margin-top: .6em; gap: 6px 20px; } .info-pl a { font-size: 14px; font-weight: 500; border-bottom-color: rgba(160, 215, 255, .35); }   /* one link per plan page */

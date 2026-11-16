@@ -383,6 +383,12 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
       loadPano(w, card, full, alt);
     };
     cards.forEach(c => c.querySelector('.u-open').addEventListener('click', () => openWalk(c)));
+    // /?tour=27 (the plan pages' "Entrar no tour 3D"): once the intro is over, go to that apartment and open its tour
+    { const want = cards.find(c => c.dataset.apt === new URLSearchParams(location.search).get('tour'));
+      if (want) { const t = setInterval(() => { if (!document.body.classList.contains('done') || document.body.classList.contains('locked')) return; clearInterval(t);
+        const sec = document.getElementById('units'), i = cards.indexOf(want), run = sec.offsetHeight - innerHeight;
+        scrollTo(0, sec.getBoundingClientRect().top + scrollY + (run > 0 ? run * i / (cards.length - 1) : 0) + 1);
+        setTimeout(() => openWalk(want), 500); }, 250); } }
     addEventListener('keydown', e => { if (e.key === 'Escape' && cur && !document.fullscreenElement) closeWalk(); });
   }
   addEventListener('scroll', onStack, { passive: true }); addEventListener('resize', onStack); onStack();
