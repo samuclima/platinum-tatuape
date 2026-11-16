@@ -130,7 +130,13 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
     i = (i + PLACES.length) % PLACES.length; const [id, title, desc, img] = PLACES[i], first = cur < 0; cur = i;
     btns.forEach((b, k) => b.classList.toggle("sel", k === i)); view?.pick(id);
     detail.classList.remove('show'); clearTimeout(swap);
-    $('dNum').textContent = two(i + 1); $('dOf').textContent = ' / ' + two(PLACES.length);
+    $('dNum').textContent = two(i + 1); $('dOf').textContent = ' / ' + two(PLACES.length); $('dLv').textContent = LEVELS[lv].title;
+    // progress: one quiet segment per place of this floor (an indicator, not more buttons)
+    const prog = $('dProg');
+    if (prog.children.length !== PLACES.length || prog.dataset.lv !== String(lv)) {
+      prog.dataset.lv = lv; prog.replaceChildren(...PLACES.map(() => document.createElement('i')));
+    }
+    [...prog.children].forEach((s, k) => s.classList.toggle('on', k === i));
     swap = setTimeout(() => {
       $('dTitle').textContent = title; $('dDesc').textContent = desc;
       const im = $('dImg'), show = () => { if (cur === i) detail.classList.add('show'); };
@@ -140,6 +146,15 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
     }, first ? 0 : 380);
   }
   $('dPrev').addEventListener('click', () => open(cur - 1)); $('dNext').addEventListener('click', () => open(cur + 1));
+  // keyboard: ← / → change the place while the floors block fills the screen (not inside a tour, not while typing)
+  $('dPrev').setAttribute('aria-keyshortcuts', 'ArrowLeft'); $('dNext').setAttribute('aria-keyshortcuts', 'ArrowRight');
+  addEventListener('keydown', e => {
+    if ((e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || e.altKey || e.ctrlKey || e.metaKey || document.documentElement.classList.contains('walking')) return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+    const r = document.getElementById('mag').getBoundingClientRect();
+    if (r.top > innerHeight * 0.3 || r.bottom < innerHeight * 0.7) return;
+    e.preventDefault(); open(cur + (e.key === 'ArrowRight' ? 1 : -1));
+  });
   open(0);
   // switch the title and the points to another level: the old lines leave upwards, the new ones rise into the same place
   const floorEl = document.getElementById('ft'), lvBtns = [...document.querySelectorAll('#lvls button')];
@@ -147,8 +162,17 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
   let swapTok = 0;
   function writeLevel() {
     const L = LEVELS[lv];
-    $('fTitle').textContent = L.title; $('fSub').textContent = L.sub; $('tag').textContent = L.tag;
+    $('fTitle').textContent = L.title; $('fSub').textContent = L.sub;
+    $('tag').textContent = (matchMedia('(hover: hover)').matches ? 'Clique' : 'Toque') + ' nos pontos do mapa';   // short: one line beside the "next floor" link
+    $('stackGo').querySelector('span').textContent = lv < LEVELS.length - 1 ? 'Próximo pavimento' : 'Continuar';   // says where it goes
   }
+  writeLevel();
+  // swipe the photo: next / previous place (phones; a mouse drag does nothing)
+  { const ph = detail.querySelector('.ph'); let sx = null, sy = 0;
+    ph.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') { sx = e.clientX; sy = e.clientY; } });
+    ph.addEventListener('pointerup', e => { if (sx === null) return; const dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) open(cur + (dx < 0 ? 1 : -1)); });
+    ph.addEventListener('pointercancel', () => { sx = null; }); }
   function setLevel(n) {
     if (n === lv) return; lv = n;
     PLACES = LEVELS[n].places; makeSpots(); open(0);
@@ -183,6 +207,12 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
     const range = stack.offsetHeight - mag.offsetHeight, top = stack.getBoundingClientRect().top + scrollY;
     scrollTo({ top: top + range * k / (LEVELS.length - 1) + (k === 0 ? 2 : 0), behavior: calm.matches ? 'auto' : 'smooth' });
   }));
+  // the pill beside the hint under the plan: on to the next level's resting place; from the last level, on to the next screen
+  $('stackGo').removeAttribute('aria-label');                         // the visible label (next floor / continue) is its name
+  $('stackGo').addEventListener('click', e => {
+    const range = stack.offsetHeight - mag.offsetHeight, top = stack.getBoundingClientRect().top + scrollY, last = LEVELS.length - 1;
+    scrollTo({ top: lv < last ? top + range * (lv + 1) / last : top + stack.offsetHeight, behavior: calm.matches ? 'auto' : 'smooth' }); e.currentTarget.blur();
+  });
   // the glass starts just before the text, leaving a clear gap after the 3D plan
   // big screens: the whole block (plan + text) scales with the screen, limited by its height so it still fits; phones / small: 1
   const placeGlass = () => {
@@ -205,10 +235,10 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
     split(t);
     const fill = () => { const r = sayEl.getBoundingClientRect(), run = r.height - innerHeight;
       const k = run > 0 ? Math.min(1, Math.max(0, (-r.top + innerHeight * 0.35) / (run * 0.9 + innerHeight * 0.35))) : 1, at = k * words.length;
-      words.forEach((w, i) => { const p = Math.min(1, Math.max(0, at - i)).toFixed(3); if (w.style.getPropertyValue('--p') !== p) w.style.setProperty('--p', p); });
-      const sun = at >= words.length;                                   // last word ("mundo.") filled → the sunset, on both panels at once
-      if (sun !== sayEl.classList.contains('sun')) { sayEl.classList.toggle('sun', sun); units.classList.toggle('sun', sun); } };
-    addEventListener('scroll', fill, { passive: true }); addEventListener('resize', fill); fill(); }
+      words.forEach((w, i) => { const p = Math.min(1, Math.max(0, at - i)).toFixed(3); if (w.style.getPropertyValue('--p') !== p) w.style.setProperty('--p', p); }); };
+    addEventListener('scroll', fill, { passive: true }); addEventListener('resize', fill); fill();
+    document.getElementById('sayGo').addEventListener('click', e => {   // on to the plans (the first apartment)
+      scrollTo({ top: units.getBoundingClientRect().top + scrollY + 1, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); e.currentTarget.blur(); }); }
   // the plans, one per screen (pinned): each apartment holds for a moment, then the next one wipes up over it (--e: 0 → 1 for that
   // slide, --x: how far the next one has covered it). The one on show (.on) brings its lines up; the switch on top jumps to one.
   { const sec = document.getElementById('units'), row = document.getElementById('uRow'), slides = [...row.querySelectorAll('.unit')], N = slides.length;
@@ -281,13 +311,10 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
     a.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; at(e); if (!hov) { tx = mx; ty = my; hov = true; a.classList.add('hov'); } });
     a.addEventListener('pointerleave', () => { hov = false; a.classList.remove('hov'); }); }
   }
-  // contact: a plain section. The glass behind the photo is measured from the layout; the floating WhatsApp steps aside while it is on screen
-  { const sec = document.getElementById('contato'), grid = sec.querySelector('.ct-grid'), ph = sec.querySelector('.ct-ph'), waFab = document.getElementById('waFab');
-    const glass = () => { if (!ph.offsetWidth) return;
-      const l = grid.offsetLeft + ph.offsetLeft, t = grid.offsetTop + ph.offsetTop;
-      sec.style.setProperty('--gl', Math.max(0, l + Math.min(28, ph.offsetWidth * 0.06)).toFixed(1) + 'px');   // (starts a little INSIDE the photo's left edge)
-      sec.style.setProperty('--gh', (t + ph.offsetHeight + 22).toFixed(1) + 'px'); };
-    new ResizeObserver(glass).observe(sec); glass();
+  // contact: an editorial block (big headline, numbered list, marquee). It rises into view once; the floating WhatsApp
+  // steps aside while it is on screen (the contact has its own WhatsApp button)
+  { const sec = document.getElementById('contato'), waFab = document.getElementById('waFab');
+    new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { sec.classList.add('in'); o.disconnect(); } }, { rootMargin: '0px 0px -20% 0px' }).observe(sec);
     new IntersectionObserver(es => es.forEach(e => waFab?.classList.toggle('off', e.isIntersecting)), { rootMargin: '-30% 0px -30% 0px' }).observe(sec);
     const btn = document.getElementById('ctCopy'), mail = document.getElementById('ctMail').textContent.trim();
     btn.addEventListener('click', async () => {

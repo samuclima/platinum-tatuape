@@ -4,6 +4,7 @@
 // and faded towards white (context under the active level); only the active level reports its points.
 //   const v = await mini3d(canvas, { urls: [...], onFrame(spots) })   spots: [{ id, x, y, front }] in CSS px
 //   v.set({ lift: [0, 30], fade: [0, 0], active: 0 })   v.focus(id | null)   v.pick(id)   v.tint(id | null)
+//   pick: a level's first place keeps the straight top view; the others each move the camera to a perspective of their own
 async function loadBin(url) {
   if ('DecompressionStream' in window) try {
     const r = await fetch(url + '.gz'); if (!r.ok) throw 0;
@@ -128,6 +129,7 @@ export async function mini3d(canvas, { urls, url, onFrame, yaw = 0, pitch = 0.62
   canvas.addEventListener('webglcontextlost', ev => { ev.preventDefault(); dead = true; });
   size();
   let fid = null;                                                       // the clicked (focused) place, so a hover can hand its colours back
+  const VIEWS = [[0.42, 0.98, 0.34], [0.4, 1.12, -0.3], [0.44, 0.9, -0.42], [0.41, 1.05, 0.46], [0.45, 1.18, 0.2], [0.4, 0.94, -0.22]];   // [zoom, tilt, turn] for the places after the first: a big zoom onto the place
   const boxes = r => { const f = new Float32Array(16); (Array.isArray(r[0]) ? r : [r]).slice(0, 4).forEach((b, i) => f.set(b, i * 4)); return f; };
   return {
     heads: () => layers.map(L => L?.head), ready: Promise.all(rest), stop() { dead = true; },
@@ -144,9 +146,10 @@ export async function mini3d(canvas, { urls, url, onFrame, yaw = 0, pitch = 0.62
       if (s) { gx = s.p[0] - C[0]; gz = s.p[2] - C[2]; gk = zoom; gp = 0.92; gy = 0.28; if (s.r) { sel = boxes(s.r); gso = 1; } } else { gx = gz = 0; gk = 1; gp = pitch; gy = 0; gso = 0; }   // closer, tilted ≈ 53° and turned a little
       kick();
     },
-    pick(id) {                                                            // the place on show: in colour, the camera stays on the whole plan (straight top view)
-      const s = layers[active]?.head.spots.find(q => q.id === id);
+    pick(id) {                                                            // the place on show, in colour. The level's first place: the whole plan, straight top view;
+      const sp = layers[active]?.head.spots || [], n = sp.findIndex(q => q.id === id), s = sp[n];   // every other one: its own perspective – tilted, turned and a little closer
       fid = s?.r ? id : null; gx = gz = 0; gk = 1; gp = pitch; gy = 0;
+      if (n > 0) { const [k, p, y] = VIEWS[(n - 1) % VIEWS.length]; gx = s.p[0] - C[0]; gz = s.p[2] - C[2];   /* centred on the place */ gk = k; gp = p; gy = y; }
       if (s?.r) { sel = boxes(s.r); gso = 1; } else gso = 0;
       kick();
     },

@@ -151,7 +151,7 @@ body.locked { overflow: hidden; }
 .panel.show .feel-go { opacity: 1; visibility: visible; transition: opacity .6s .9s, visibility 0s, background .25s, color .25s; }
 .panel.show .feel.leaving .feel-go { opacity: 0; visibility: hidden; transition: opacity .3s, visibility 0s .3s; }
 .feel-go:focus-visible { outline: 2px solid var(--purple); outline-offset: 3px; }
-@media (min-width: 701px) and (min-aspect-ratio: 4/5) { .feel .cap { bottom: calc(clamp(18px, 4vh, 40px) + 62px); } }   /* the caption sits above the pill */
+@media (min-width: 701px) and (min-aspect-ratio: 4/5) { .feel .cap { bottom: calc(clamp(18px, 4vh, 40px) + 58px); } }   /* the caption sits above the pill */
 @media (min-width: 701px) and (min-aspect-ratio: 4/5) and (max-height: 820px) { .duo { --gh: 37vh; } }   /* short laptops: room for caption + pill */
 .panel.show .feel .kicker { opacity: 1; }
 .panel.show .duo .w > span { transform: none; }
@@ -159,8 +159,9 @@ body.locked { overflow: hidden; }
   .duo { --gw: 84vw; --gh: min(36vh, 340px); font-size: clamp(36px, 11.5vw, 64px); line-height: .98; white-space: normal; }
   .duo .w { max-width: 92vw; }
   .feel .cap { bottom: 88px; }   /* clear of the WhatsApp button */
-  .feel-go { bottom: max(18px, calc(env(safe-area-inset-bottom) + 8px)); padding: 6px 6px 6px 16px; gap: 10px; font-size: 11px; letter-spacing: .12em; }
-  .feel-go i { width: 30px; height: 30px; }
+  .feel-go { bottom: max(18px, calc(env(safe-area-inset-bottom) + 8px)); padding: 6px 6px 6px 18px; gap: 10px; font-size: 12.5px; letter-spacing: .12em; box-shadow: 0 14px 28px -10px rgba(60, 25, 130, .75); }
+  .feel-go i { width: 36px; height: 36px; }
+  .feel-go svg { width: 16px; height: 16px; }
 }
 /* magazine spread: picture on one side, the text set low on the opposite one */
 .mag { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(12px, 2vw, 28px); align-items: center; align-content: center;
@@ -191,7 +192,17 @@ body.locked { overflow: hidden; }
 .spots.moving { opacity: 0 !important; transition: opacity .2s; }
 .spots.moving .spot { pointer-events: none; }
 .detail.noimg .ph { display: none; }
-.mini .tag { position: absolute; left: 0; right: 0; top: 100%; margin: 0; padding-top: 10px; border-top: 1px solid var(--hair); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--purple-dim); pointer-events: none; }
+/* under the plan: the hint line and a small pill that scrolls on to the next level (after the last one: on to the next screen) */
+.mini .tagrow { position: absolute; left: 0; right: 0; top: 100%; display: flex; align-items: center; gap: 14px; padding-top: 10px; border-top: 1px solid var(--hair); }
+.mini .tag { margin: 0; min-width: 0; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--purple-dim); pointer-events: none; }
+.stack-go { position: relative; flex: none; gap: 8px; padding: 3px 3px 3px 13px; font-size: 10px; letter-spacing: .12em; background: var(--purple); color: #fff; border-color: transparent;
+  -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: 0 8px 18px -10px rgba(60, 25, 130, .7); }
+.stack-go::before { content: ""; position: absolute; inset: -9px; }                          /* bigger tap area */
+.stack-go i { width: 24px; height: 24px; background: #fff; color: var(--purple); }
+.stack-go svg { width: 12px; height: 12px; }
+.stack-go:hover, .stack-go:focus-visible { background: #3a1f78; color: #fff; }
+.stack-go:hover i, .stack-go:focus-visible i { background: #fff; color: #3a1f78; }
+.stack-go:focus-visible { outline: 2px solid var(--purple); outline-offset: 3px; }
 .spots { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity .8s ease .4s; }
 .mini.on .spots { opacity: 1; }
 .spot { position: absolute; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; padding: 0; border: 2px solid #fff; border-radius: 50%; cursor: pointer; pointer-events: auto;
@@ -241,6 +252,45 @@ body.locked { overflow: hidden; }
 .detail h3 span { display: block; transform: translate3d(0, 110%, 0); transition: transform .8s var(--ease) .12s; }
 .detail .desc { margin: 0; max-width: 46ch; font-size: clamp(15px, 1.1vw, 17px); line-height: 1.6; color: #3a2470; opacity: 0; transform: translate3d(0, 10px, 0); transition: opacity .6s ease .25s, transform .8s var(--ease) .25s; }
 .detail .cnt b { display: inline-block; transition: opacity .3s ease; }
+.detail .dk { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--purple-dim); }   /* the floor the place is on */
+.detail .dk { display: none; }                                      /* (the plan's title already names the floor) */
+.detail .prog { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.detail .prog i { flex: 1; height: 3px; border-radius: 2px; background: var(--hair); transition: background .4s; }
+.detail .prog i.on { background: var(--purple); }
+@media (min-width: 861px) {                                         /* desktop: a bigger picture, name and text – then one quiet row: count · progress · arrows */
+  /* fill the screen's height (no empty bands above and below): the plan is as tall as the screen allows – minus its title
+     row (72 px) and the hint row under it (56 px) – and the card's photo grows with it. --z: the big-screen scale of the
+     block (zoom), so the heights are divided by it to stay one screen tall */
+  /* an editorial spread on ONE grid, no floating card: left the floor (title row · plan · hint row), right the place
+     (picture · name · text · count row). Both columns start on the same line (the floor title = the top of the picture)
+     and end on the same hairline (the hint row = the count row). The picture keeps a landscape 3:2. */
+  /* the RIGHT column sets the height: a 4:3 picture, a one-line name, a fixed 3-line text slot, the count row – the same
+     height for every place. The plan (left) takes exactly that height (stretch), so both columns start on one line (floor
+     title = top of the picture) and end on one hairline, with no hole inside; the spread is centred with even air around */
+  .mag { --pv: clamp(28px, 5vh, 64px); padding-top: var(--pv); padding-bottom: var(--pv); align-items: stretch; }
+  .mini { grid-column: 1 / span 6; aspect-ratio: auto; height: auto; min-height: 260px; align-self: stretch; margin-top: 80px; margin-bottom: 56px; }   /* 80: title row · 56: hint row */
+  .mag::after, .mag .side::after { display: none; }                   /* no glass panel */
+  .mag .side { grid-column: 7 / span 6; padding-left: clamp(28px, 3.4vw, 64px); margin-top: 0; align-self: start; }
+  .detail { display: flex; flex-direction: column; padding: 0; }
+  .detail .ph { flex: none; aspect-ratio: 4 / 3; height: auto; max-height: max(180px, calc((100vh - 2 * var(--pv)) / var(--z, 1) - 250px)); border-radius: clamp(12px, 1.2vw, 18px); }
+  .detail h3 span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* one line: the column keeps its height */
+  .detail .desc { min-height: calc(3 * 1.6em); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+  .mini .tag { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .detail.noimg .ph { display: grid; place-items: center; } .detail.noimg .ph img { display: none; }   /* a place without a render keeps the frame */
+  .detail.noimg .ph::after { content: "← Veja no mapa ao lado"; font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--purple-dim); }
+  .lvls button.on { box-shadow: none; }                                /* flat buttons in this block */
+  .detail h3 { margin: clamp(16px, 2.2vh, 24px) 0 8px; font-size: clamp(24px, 2.1vw, 36px); line-height: 1.15; }
+  .detail .desc { margin: 0; font-size: clamp(14.5px, 1.1vw, 17px); line-height: 1.6; max-width: 48ch; }
+  /* the count row sits on the same hairline as the plan's hint row (both 56 px, a line on top) */
+  .detail .top { order: 5; box-sizing: border-box; height: 56px; margin: clamp(14px, 2vh, 22px) 0 0; padding-top: 10px; border-top: 1px solid var(--hair); gap: 18px; }
+  .detail .cnt { font-size: 12px; letter-spacing: .12em; }
+  .detail .cnt b { font-size: 18px; font-weight: 700; line-height: 1; letter-spacing: .02em; margin-right: 1px; }
+  .detail .prog { flex: 1; }
+  .detail .arw { gap: 8px; }
+  .detail .arw button, .detail .arw button:first-child { width: 42px; height: 42px; background: #fff; color: var(--purple); box-shadow: inset 0 0 0 1.5px rgba(75, 42, 143, .35); }
+  .detail .arw button:hover, .detail .arw button:focus-visible { background: var(--purple); color: #fff; box-shadow: none; transform: none; }
+  .detail .arw svg { width: 18px; height: 18px; }
+}
 .detail:not(.show) .cnt b { opacity: .25; }
 .detail.show .ph { clip-path: inset(0); }
 .detail.show .ph img { transform: none; }
@@ -249,62 +299,109 @@ body.locked { overflow: hidden; }
 .mag .rv { opacity: 0; transform: translate3d(0, 28px, 0); transition: opacity .9s ease, transform 1s var(--ease); }
 .mag .rv.in { opacity: 1; transform: none; }
 .mag .side.rv { transition-delay: .15s; }
-@media (max-width: 860px) {                                       /* phones: title + switch, the plan, then the place – all in one screen */
-  .mag { display: block; padding: 18px 16px 22px; }
-  .mini { margin: 66px -4px 0; aspect-ratio: 4 / 3; }
-  .mini .floor { left: 4px; right: 4px; transform: translateY(calc(-100% - 10px)); align-items: center; }
-  .mini .ft { gap: 4px; } .mini .ft b { font-size: 28px; } .mini .ft span { font-size: 9.5px; letter-spacing: .14em; }
-  .lvls button { padding: 9px 10px; font-size: 12px; }
-  .mini .tag { font-size: 9.5px; padding-top: 8px; }
-  .mini .ill-mini { top: 2px; bottom: auto; right: 4px; translate: none; }   /* phones: in the plan's corner, off the hint line */
-  .mag .side { margin-top: 40px; }
-  .detail .top { margin-bottom: 10px; }
-  .detail .cnt b { font-size: 40px; }
-  .detail .arw button { width: 48px; height: 48px; }
-  .detail .ph { aspect-ratio: 16 / 9; }
+@media (max-width: 860px) {                                       /* phones: the place (picture) on top, then title + switch and the plan, then the scroll pill */
+  /* exactly one screen tall: the card has a fixed height (whatever the place's name / text), the plan takes what is left */
+  /* three calm blocks: the place card (photo with a small "‹ 02/09 ›" on it, name, text), the floor switch + the plan, one "next" link */
+  .mag { --ph: clamp(110px, calc(30svh - 20px), 240px); --dh: calc(var(--ph) + 112px);   /* room for 2 lines of name + 2 of text (a 3rd only trims the plan a little) */
+    display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; height: 100vh; height: 100svh; min-height: 0;
+    padding: 26px 16px max(16px, env(safe-area-inset-bottom)); }
+  .mag .side { order: 1; align-self: stretch; flex: none; margin-top: 0; }
+  .detail { position: relative; min-height: var(--dh); align-self: start; }
+  .mini { order: 2; align-self: stretch; flex: 1 1 0; min-height: 90px; margin: 80px -4px 68px; aspect-ratio: auto; }   /* above: the card's glass (22 px) + the switch; below: the next pill */
+  .mini .floor { left: 4px; right: 4px; transform: translateY(calc(-100% - 8px)); justify-content: center; }
+  .mini .ft { display: none; }                                         /* the switch already says which floor */
+  .lvls { flex: 1; } .lvls button { flex: 1; padding: 10px 6px; font-size: 13px; }
+  .mini .tagrow { left: 4px; right: 4px; padding-top: 10px; border-top: 0; justify-content: center; }   /* centred: clear of the WhatsApp button */
+  .mini .tag { display: none; }
+  .stack-go { gap: 12px; padding: 6px 6px 6px 20px; font-size: 12.5px; letter-spacing: .12em; background: var(--purple); color: #fff; box-shadow: 0 14px 28px -10px rgba(60, 25, 130, .8); }   /* phones: a bold pill with a ring */
+  .stack-go i { width: 38px; height: 38px; background: #fff; color: var(--purple); }
+  .stack-go svg { width: 16px; height: 16px; }
+  .stack-go:hover, .stack-go:focus-visible { background: var(--purple); color: #fff; }
+  .stack-go:hover i, .stack-go:focus-visible i { background: #fff; color: var(--purple); }
+  .mini .ill-mini { top: 2px; bottom: auto; right: 4px; translate: none; }   /* phones: in the plan's corner */
+  /* counter + arrows: one small row lying on the bottom of the photo */
+  .detail .top { position: absolute; z-index: 2; left: 10px; right: 10px; top: calc(var(--ph) - 50px); margin: 0; pointer-events: none; }
+  .detail .top > * { pointer-events: auto; }
+  .detail .cnt { padding: 7px 12px; border-radius: 999px; font-size: 11px; letter-spacing: .1em; color: rgba(255, 255, 255, .78);
+    background: rgba(22, 14, 30, .42); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  .detail .cnt b { font-size: 14px; font-weight: 700; line-height: 1; letter-spacing: .06em; color: #fff; margin: 0; }
+  .detail .arw { gap: 8px; }
+  .detail .prog, .detail .dk { display: none; }                       /* phones keep the compact card */
+  .detail .arw button, .detail .arw button:first-child { width: 40px; height: 40px; background: rgba(255, 255, 255, .94); color: var(--purple); box-shadow: 0 6px 16px -6px rgba(0, 0, 0, .5); }
+  .detail .arw button:hover, .detail .arw button:focus-visible { background: #fff; color: var(--purple); transform: none; }
+  .detail .arw svg { width: 20px; height: 20px; }
+  .detail .ph { aspect-ratio: auto; height: var(--ph); touch-action: pan-y; }   /* swipe the photo for the next / previous place */
+  .detail.noimg .ph { display: grid; place-items: center; } .detail.noimg .ph img { display: none; }   /* no render for this place: keep the frame so nothing jumps */
+  .detail.noimg .ph::after { content: "Veja no mapa abaixo ↓"; font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--purple-dim); }
+  .mini .tagrow { justify-content: flex-start; padding-left: 8px; }   /* the link starts on the left, well clear of the WhatsApp button */
   .detail h3 { margin: 12px 0 6px; font-size: 24px; }
+  .detail h3 span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }   /* at most 2 lines (the card reserves them) */
   .detail .desc { font-size: 14px; line-height: 1.5; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
   .spot { width: 26px; height: 26px; margin: -13px 0 0 -13px; font-size: 11px; }
 }
-@media (max-width: 860px) and (max-height: 760px) { .mini { aspect-ratio: 16 / 10; } .detail .ph { aspect-ratio: 2 / 1; } .detail .cnt b { font-size: 32px; } }   /* short phones */
+@media (max-width: 860px) and (max-height: 760px) { .detail .desc { -webkit-line-clamp: 2; } }   /* short phones: 2 lines of text */
+/* the "scroll down" pills (all screens): solid, a big arrow and a slow ring going out, so they are hard to miss */
+.hint-b { position: relative; }
+.feel-go { position: absolute; }
+.hint-b::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2px solid var(--ring, var(--navy)); pointer-events: none; opacity: 0; animation: ping 2.2s ease-out infinite; }
+.feel-go, .stack-go { --ring: var(--purple); }
+.hint .hint-b { padding: 8px 8px 8px 24px; font-size: 13px; background: var(--navy); color: #fff; border-color: transparent; box-shadow: 0 16px 34px -12px rgba(21, 28, 58, .7); }
+.hint .hint-b i, .hint .hint-b:hover i, .hint .hint-b:focus-visible i { width: 40px; height: 40px; background: #fff; color: var(--navy); }
+.hint .hint-b:hover, .hint .hint-b:focus-visible { background: #26305e; }
+.hint .hint-b svg { width: 17px; height: 17px; }
+.hint-d { font-size: 12px; opacity: .9; }
+@media (min-width: 861px) {
+  .feel-go { padding: 8px 8px 8px 24px; font-size: 13px; }
+  .feel-go i { width: 40px; height: 40px; } .feel-go svg { width: 17px; height: 17px; }
+  /* floors: the hint on the left, the "next floor" pill on the right of the line under the plan; the "illustrative" tag in the plan's corner */
+  .mini .tagrow { justify-content: space-between; padding-top: 14px; }
+  /* desktop: a quiet text link (the plan and the place card lead; the page scrolls by itself) */
+  .stack-go { gap: 10px; padding: 4px 4px 4px 8px; font-size: 11px; letter-spacing: .14em; background: none; color: var(--purple); box-shadow: none; }
+  .stack-go::after { display: none; }
+  .stack-go i { width: 28px; height: 28px; background: var(--purple); color: #fff; box-shadow: none; } .stack-go svg { width: 13px; height: 13px; }
+  .stack-go:hover, .stack-go:focus-visible { background: none; color: #3a1f78; }
+  .stack-go:hover i, .stack-go:focus-visible i { background: #3a1f78; color: #fff; }
+  .mini .ill-mini { top: 8px; right: 10px; bottom: auto; translate: none; }
+}
+@keyframes ping { 0% { opacity: .7; transform: none; } 70%, 100% { opacity: 0; transform: scale(1.14, 1.55); } }
+@media (prefers-reduced-motion: reduce) { .hint-b::after { animation: none; } }
 @media (max-width: 380px) { .lvls button { padding: 8px 8px; font-size: 11px; } .mini .ft b { font-size: 24px; } }
 @media (prefers-reduced-motion: reduce) { .duo .w > span, .mag .rv { transform: none; transition: none; opacity: 1; } .feel .kicker { opacity: 1; } }
 
 /* ---------------- TOURS (the former chooser) ---------------- */
 /* statement before the plans: pinned; each word fills grey → purple, left to right, as the page scrolls (--p per word, set in JS) */
-.say { height: 260vh; height: 260svh; background: #fff; position: relative; isolation: isolate; }
-/* sunset, part 1: when the last word fills, the whole screen fades from white to peach → amber (.sun, set by the word fill).
-   The gradient sits on the last screen of the panel, so its amber bottom meets the top of the cards panel, which carries on amber → rose → navy. */
-.say::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 1.4s cubic-bezier(.4, 0, .2, 1);
-  background: linear-gradient(180deg, #fbe9d8 0%, #fbe9d8 calc(100% - 120vh), #f6cfae calc(100% - 55vh), #eba680 100%); }   /* the last screen of the panel: peach → amber */
-.say.sun::before { opacity: 1; }
+.say { height: 260vh; height: 260svh; background: #fff; position: relative; isolation: isolate; --say-ink: #4b2a8f; transition: --say-ink 1.4s cubic-bezier(.4, 0, .2, 1); }
+/* (the statement, the plans and the visit all stay white: the blue belongs to the contact alone) */
+@property --say-ink { syntax: "<color>"; inherits: true; initial-value: #4b2a8f; }
 .say-in { position: sticky; top: 0; min-height: 100vh; min-height: 100svh; display: grid; align-content: center; justify-items: start;
   max-width: min(1500px, 88vw); margin: 0 auto; padding: 0 clamp(20px, 6vw, 96px); box-sizing: border-box; }
-.say-k { margin: 0 0 clamp(18px, 2.4vw, 36px); font-size: clamp(11px, .8vw, 15px); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--purple-dim); }
+.say-k { margin: 0 0 clamp(18px, 2.4vw, 36px); font-size: clamp(11px, .8vw, 15px); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--say-ink); opacity: .66; }
 .say-t { margin: 0; font-weight: 300; font-size: clamp(34px, 5.2vw, 104px); line-height: 1.08; letter-spacing: -.035em; max-width: 17em; color: #c9c5d1; }
 .say-t b { font-weight: 700; }
 .say-t .w { --p: 0; color: transparent; -webkit-background-clip: text; background-clip: text;
-  background-image: linear-gradient(90deg, var(--purple) calc(var(--p) * 100%), #cdc9d6 calc(var(--p) * 100%)); }
+  background-image: linear-gradient(90deg, var(--say-ink) calc(var(--p) * 100%), #cdc9d6 calc(var(--p) * 100%)); }
 @media (prefers-reduced-motion: reduce) { .say { height: auto; } .say-t .w { --p: 1 !important; } }
+/* under the statement: straight on to the plans */
+.say-go { --ring: #4b2a8f; margin-top: clamp(28px, 4.5vh, 52px); padding: 8px 8px 8px 24px; font-size: 13px; background: #4b2a8f; color: #fff; border-color: transparent;
+  box-shadow: 0 16px 32px -14px rgba(60, 25, 130, .8); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.say-go i, .say-go:hover i, .say-go:focus-visible i { width: 40px; height: 40px; background: #fff; color: #4b2a8f; }
+.say-go svg { width: 17px; height: 17px; }
+.say-go:hover, .say-go:focus-visible { background: #3a1f78; color: #fff; }
+.say-go:focus-visible { outline: 2px solid #4b2a8f; outline-offset: 3px; }
 /* the plans: one apartment per screen. The panel is pinned; scrolling holds each apartment a moment, then the next one wipes up
    over it (clip from the bottom, its photo settling from a zoom) while the current one sinks back and darkens. The text of the
    apartment on show rises line by line out of masks; the tour-style line plan floats beside it. Click anywhere -> the photo tour. */
-.units { --n: 5; position: relative; isolation: isolate; height: calc(100vh + (var(--n) - 1) * 110vh); height: calc(100svh + (var(--n) - 1) * 110svh); background: none; }   /* the sunset is on .dusk */
+.units { --n: 5; position: relative; isolation: isolate; height: calc(100vh + (var(--n) - 1) * 110vh); height: calc(100svh + (var(--n) - 1) * 110svh); background: #fff; }
 .units-pin { position: sticky; top: 0; height: 100vh; height: 100svh; box-sizing: border-box; display: flex; flex-direction: column; gap: clamp(10px, 1.6vh, 18px);
   padding: clamp(14px, 2.6vh, 30px) clamp(12px, 2vw, 32px) clamp(12px, 2vw, 32px); }
-/* white until the statement's last word fills, then this white layer fades off together with the statement's own (.sun) */
-.units::before { content: ""; position: absolute; inset: 0; z-index: -1; background: #fff; transition: opacity 1.4s cubic-bezier(.4, 0, .2, 1); pointer-events: none; }
-.units.sun::before { opacity: 0; }
-@media (prefers-reduced-motion: reduce) { .units::before, .say::before { transition-duration: .01s; } }
 .u-head { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; padding: 0 clamp(4px, .6vw, 10px); }
-.units-k { margin: 0; font-size: clamp(11px, .8vw, 14px); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: #fff; }
-.u-nav { display: flex; gap: 3px; padding: 4px; border-radius: 999px; background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .35);
-  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
-.u-nav button { padding: 8px 13px; border: 0; border-radius: 999px; background: none; color: #fff; font: 600 12.5px/1 Manrope, system-ui, sans-serif; white-space: nowrap; cursor: pointer; transition: background .3s, color .3s; }
-.u-nav button:hover, .u-nav button:focus-visible { background: rgba(255, 255, 255, .22); outline: none; }
-.u-nav button.on { background: #fff; color: #5a2c35; }
+.units-k { margin: 0; font-size: clamp(11px, .8vw, 14px); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--purple-dim); }
+.u-nav { display: flex; gap: 3px; padding: 4px; border-radius: 999px; background: #f1ecf9; box-shadow: inset 0 0 0 1px var(--hair); }   /* same switch as the floors' */
+.u-nav button { padding: 8px 13px; border: 0; border-radius: 999px; background: none; color: var(--purple); font: 600 12.5px/1 Manrope, system-ui, sans-serif; white-space: nowrap; cursor: pointer; transition: background .3s, color .3s; }
+.u-nav button:hover, .u-nav button:focus-visible { background: rgba(255, 255, 255, .8); outline: none; }
+.u-nav button.on { background: var(--purple); color: #fff; box-shadow: 0 6px 14px -6px rgba(40, 20, 90, .6); }
 .units-row { --g: 1; position: relative; flex: 1; min-height: 0; border-radius: clamp(16px, 1.8vw, 30px); overflow: hidden; background: #1d1512; isolation: isolate;
-  box-shadow: 0 40px 80px -50px rgba(60, 25, 20, .7); transform: scale(calc(.9 + .1 * var(--g))); transform-origin: 50% 100%; }   /* --g: grows into place as the panel arrives */
+  transform: scale(calc(.9 + .1 * var(--g))); transform-origin: 50% 100%; }   /* --g: grows into place as the panel arrives */
 .unit { --e: 0; --x: 0; --ez: cubic-bezier(.2, .8, .2, 1); position: absolute; inset: 0; overflow: hidden; color: #fff; isolation: isolate;
   clip-path: inset(calc((1 - var(--e)) * 100%) 0 0 0); visibility: hidden; }
 .unit.seen { visibility: visible; }
@@ -456,18 +553,15 @@ body.locked { overflow: hidden; }
 .u-modal.full .pv-rooms button { padding: 8px 13px; font-size: 12px; }
 .u-modal.full .u-hint { bottom: calc(max(10px, env(safe-area-inset-bottom)) + 46px); font-size: 11.5px; padding: 7px 12px; }
 html.walking, html.walking body { overflow: hidden; }
-/* sunset, part 2: ONE gradient behind the cards and the visit button, amber (where the statement panel ends) → warm rose, at an even pace */
+/* ONE blue behind the cards and the visit button: the blue the statement panel ends with, the same the contact starts with */
 /* the fine grain on top dithers the long, slow gradient so it shows no 8-bit bands (they read as lines) */
-.dusk { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 180px 180px, linear-gradient(180deg, #eba680 0%, #e79a71 45%, #e28d63 80%, #df865b 100%); }   /* sunset orange (was dusky pink) */
+.dusk { background: #fff; }   /* the cards and the visit sit on white; only the contact is blue */
 /* the building visit: a framed screen with the lobby turning slowly in 360 degrees (CSS cube of the visit's own baked photos,
    visita/pano/2_*.jpg). The whole panel is the link; on desktop a round "click to enter" follows the cursor. Its background
-   carries the sunset on into the blue of the contact below. */
-.lob { position: relative; padding: clamp(40px, 8vh, 90px) clamp(12px, 2vw, 32px);
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 180px 180px,
-    linear-gradient(180deg, #df865b 0%, #b8707a 38%, #5d5891 72%, #1f3f86 100%); }
+   is the same blue as the cards above and the contact below. */
+.lob { position: relative; padding: clamp(40px, 8vh, 90px) clamp(12px, 2vw, 32px) calc(clamp(40px, 8vh, 90px) + clamp(20px, 4vw, 44px)); background: #fff; }   /* (+ the contact's rounded top, which overlaps it) */
 .lob-in { --mx: 0px; --my: 0px; position: relative; display: block; height: calc(100vh - 2 * clamp(12px, 2vw, 32px)); height: calc(100svh - 2 * clamp(12px, 2vw, 32px)); min-height: 460px;
-  border-radius: clamp(16px, 1.8vw, 30px); overflow: hidden; isolation: isolate; color: #fff; text-decoration: none; background: #2a2230 url(/home/feel/lobby.jpg) center / cover;
-  box-shadow: 0 50px 90px -50px rgba(20, 20, 60, .8); cursor: none; }
+  border-radius: clamp(16px, 1.8vw, 30px); overflow: hidden; isolation: isolate; color: #fff; text-decoration: none; background: #2a2230 url(/home/feel/lobby.jpg) center / cover; cursor: none; }
 @media (hover: none), (pointer: coarse) { .lob-in { cursor: pointer; } }
 .lob-pv { position: absolute; inset: 0; z-index: -2; overflow: hidden; opacity: 0; transition: opacity 1.2s ease; }
 .lob-pv.ready { opacity: 1; }
@@ -500,7 +594,7 @@ html.walking, html.walking body { overflow: hidden; }
 .lob-in:focus-visible .lob-cue { background: #1f2a5c; color: #fff; }
 .lob-ill { left: 16px; bottom: 16px; }
 @media (max-width: 860px) {
-  .lob { padding: 28px 10px; }
+  .lob { padding: 28px 10px 48px; }
   .lob-in { height: calc(100svh - 56px); min-height: 500px; border-radius: 20px; }
   .lob-t { font-size: clamp(34px, 10.5vw, 52px); }
   .lob-k { font-size: 10.5px; letter-spacing: .16em; }
@@ -530,55 +624,102 @@ html.walking .wa-fab { opacity: 0; pointer-events: none; }
    the right on a light fluted glass that runs from just inside the photo to the right edge (--gl, measured in JS) */
 /* contact + footer share ONE background panel (.ct-bg): the blue the visit panel ends with, darkening to the footer's navy */
 .ct-bg { position: relative; z-index: 3; color: #fff;
+  margin-top: calc(-1 * clamp(20px, 4vw, 44px)); border-radius: clamp(20px, 4vw, 44px) clamp(20px, 4vw, 44px) 0 0; box-shadow: 0 -24px 70px rgba(20, 30, 90, .2);   /* a blue sheet rising over the white, like the white one over the 3D */
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 180px 180px,
     radial-gradient(45% 30% at 8% 48%, rgba(70, 90, 210, .3), transparent 70%),
     linear-gradient(180deg, #1f3f86 0%, #1a2d66 40%, #151c3a 72%, #0e1430 100%); }
-.contact { position: relative; overflow: hidden; display: grid; align-items: center; min-height: 100vh; min-height: 100svh; color: #fff;
-  padding: clamp(56px, 10vh, 120px) clamp(20px, 6vw, 100px); }
-.ct-grid { position: relative; z-index: 1; width: 100%; max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: clamp(24px, 5vw, 80px); }
+/* contact – clear and personal: on the left the heading, a line, and three contact cards (icon · label + value · action);
+   on the right the corretor in a large portrait card with a caption. It rises into view once (.in, set in JS). */
+.contact { position: relative; display: grid; align-items: center; min-height: 100vh; min-height: 100svh; color: #fff;
+  padding: clamp(64px, 11vh, 130px) clamp(20px, 5vw, 80px); box-sizing: border-box; }
+.ct-in { width: 100%; max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; gap: clamp(32px, 6vw, 100px); }
 .ct-copy { min-width: 0; }
 .ct-k { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: rgba(160, 215, 255, .9); }
-.ct-t { margin: 14px 0 14px; font-weight: 300; font-size: clamp(40px, 5.6vw, 96px); line-height: 1; letter-spacing: -.035em; }
-.ct-t b { font-weight: 700; }
-.ct-p { margin: 0 0 clamp(20px, 3.4vh, 34px); max-width: 34ch; font-size: clamp(15px, 1.15vw, 18px); line-height: 1.6; color: rgba(255, 255, 255, .84); }
-.ct-mail { display: flex; align-items: center; gap: 14px; max-width: 100%; }   /* no pill: the address (opens the e-mail app) + the copy icon */
-.ct-ml { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(19px, 1.75vw, 28px); font-weight: 600; letter-spacing: -.01em; color: #fff;
-  text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, .35); padding-bottom: 2px; transition: border-color .2s, color .2s; }
-.ct-ml:hover, .ct-ml:focus-visible { color: #a8dcff; border-color: #a8dcff; outline: none; }
-.ct-mail button { flex: none; width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .1); color: #fff; cursor: pointer; transition: background .2s, color .2s, transform .3s var(--ease); }
-.ct-mail button svg { width: 21px; height: 21px; }
-.ct-mail button:active { transform: scale(.92); }
-.ct-mail button:hover, .ct-mail button:focus-visible { background: #fff; color: #1a2d66; outline: none; }
-.ct-mail button.ok { background: #5fd6b4; color: #0d2a22; }
-.ct-wa { display: inline-flex; align-items: center; gap: 14px; margin-top: 18px; padding: 14px 26px 14px 18px; border-radius: 999px; background: #25d366; color: #0b2e1a; text-decoration: none;
-  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, .55); transition: transform .35s var(--ease), background .2s; }
-.ct-wa:hover, .ct-wa:focus-visible { background: #3ee07d; transform: translateY(-2px); outline: none; }
-.ct-wa svg { width: 30px; height: 30px; flex: none; }
-.ct-wa span { display: grid; gap: 2px; text-align: left; }
-.ct-wa b { font-size: 16px; } .ct-wa small { font-size: 13px; font-weight: 600; opacity: .8; }
-.ct-ph { position: relative; z-index: 1; margin: 0; justify-self: end; width: min(100%, 460px); aspect-ratio: 3 / 4; max-height: 76vh; border-radius: clamp(18px, 2vw, 30px);
-  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .7); }
-/* fluted glass, the site's identity (same as beside the 3D plans): wide rounded flutes, a sheen from the top, a bright edge */
-.ct-glass { position: absolute; z-index: 0; top: clamp(14px, 2.4vh, 28px); bottom: clamp(14px, 2.4vh, 28px); right: clamp(14px, 1.6vw, 28px); left: var(--gl, 58%);
-  border-radius: clamp(20px, 2.2vw, 32px); pointer-events: none;
-  background:
-    radial-gradient(120% 50% at 30% 0%, rgba(255, 255, 255, .42), rgba(255, 255, 255, 0) 62%),
-    linear-gradient(90deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .34) 40%, rgba(255, 255, 255, .14) 64%, rgba(255, 255, 255, .05)),
-    linear-gradient(180deg, rgba(225, 238, 255, .30), rgba(225, 238, 255, .20));   /* a light, milky glass */
-  background-size: 100% 100%, 56px 100%, 100% 100%;
-  -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 1px 0 0 rgba(255, 255, 255, .35), inset 0 0 0 1px rgba(255, 255, 255, .12), 0 30px 60px -40px rgba(0, 0, 0, .5); }
-.ct-ph picture { display: block; width: 100%; height: 100%; border-radius: inherit; overflow: hidden; }
-.ct-ph img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; }
-@media (max-width: 860px) {                                        /* phones: the photo on its glass first, then the words, a full-width WhatsApp button */
-  .contact { min-height: 0; padding: 22px 16px 56px; }
-  .ct-grid { grid-template-columns: 1fr; gap: 50px; }
-  .ct-ph { order: -1; justify-self: center; width: min(64vw, 280px); aspect-ratio: 4 / 5; max-height: none; margin-top: 18px; }
-  .ct-glass { left: 10px; right: 10px; top: 10px; bottom: auto; height: var(--gh, 50%); border-radius: 24px; }
-  .ct-t { font-size: clamp(40px, 12vw, 56px); margin: 10px 0; } .ct-p { margin-bottom: 20px; font-size: 15px; }
-  .ct-mail { justify-content: space-between; gap: 10px; padding: 14px 0; border-top: 1px solid rgba(255, 255, 255, .16); border-bottom: 1px solid rgba(255, 255, 255, .16); }
-  .ct-ml { font-size: clamp(13px, 3.85vw, 18px); border-bottom: 0; padding: 0; } .ct-mail button { width: 42px; height: 42px; }
-  .ct-wa { display: flex; justify-content: center; margin-top: 20px; padding: 14px 18px; } .ct-wa b { font-size: 15px; }
+.ct-t { margin: 14px 0 16px; font-weight: 300; font-size: clamp(48px, 6vw, 104px); line-height: .95; letter-spacing: -.045em; }
+.ct-t b { display: block; font-weight: 700; }
+.ct-p { margin: 0; max-width: 36ch; font-size: clamp(15px, 1.15vw, 18px); line-height: 1.6; color: rgba(255, 255, 255, .82); }
+/* the three ways to reach us – one card each */
+.ct-cards { list-style: none; margin: clamp(26px, 4vh, 40px) 0 0; padding: 0; display: grid; gap: 12px; max-width: 560px; }
+.ct-card { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 14px 18px 14px 14px; border-radius: 18px;
+  background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .14); color: #fff; text-decoration: none;
+  transition: background .3s, border-color .3s, transform .4s var(--ease); }
+a.ct-card:hover, a.ct-card:focus-visible { background: rgba(255, 255, 255, .11); border-color: rgba(255, 255, 255, .32); transform: translateY(-2px); outline: none; }
+.ct-ic { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .1); color: #a8dcff; }
+.ct-ic svg { width: 24px; height: 24px; }
+.ct-tx { display: grid; gap: 3px; min-width: 0; }
+.ct-tx small { font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: rgba(255, 255, 255, .62); }
+.ct-tx b, .ct-ml { font-size: clamp(16px, 1.3vw, 20px); font-weight: 600; letter-spacing: -.01em; color: inherit; }
+.ct-ml { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; transition: color .25s; }
+.ct-ml:hover, .ct-ml:focus-visible { color: #a8dcff; outline: none; }
+.ct-act { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; opacity: .9; }
+.ct-act i { font-style: normal; font-size: 15px; transition: transform .4s var(--ease); }
+a.ct-card:hover .ct-act i, a.ct-card:focus-visible .ct-act i { transform: translateX(4px); }
+/* WhatsApp: the main one, in green */
+.ct-card-wa { background: #25d366; border-color: #25d366; color: #0b2e1a; }
+a.ct-card-wa:hover, a.ct-card-wa:focus-visible { background: #3ee07d; border-color: #3ee07d; }
+.ct-card-wa .ct-ic { background: rgba(255, 255, 255, .35); color: #0b2e1a; }
+.ct-card-wa .ct-tx small { color: rgba(11, 46, 26, .7); }
+.ct-card #ctCopy { flex: none; width: 42px; height: 42px; padding: 0; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .08); color: #fff; cursor: pointer; transition: background .2s, color .2s, transform .3s var(--ease); }
+.ct-card #ctCopy svg { width: 19px; height: 19px; }
+.ct-card #ctCopy:active { transform: scale(.92); }
+.ct-card #ctCopy:hover, .ct-card #ctCopy:focus-visible { background: #fff; color: #1a2d66; outline: none; }
+.ct-card #ctCopy.ok { background: #5fd6b4; color: #0d2a22; }
+/* the corretor: a large portrait card with a caption on a dark glass strip */
+.ct-ph { position: relative; justify-self: end; width: min(100%, 440px); aspect-ratio: 4 / 5; max-height: 78vh; margin: 0; border-radius: clamp(20px, 2.2vw, 32px); overflow: hidden;
+  background: #2a4b98; box-shadow: 0 40px 80px -44px rgba(0, 0, 0, .7); }
+.ct-ph picture, .ct-ph img { display: block; width: 100%; height: 100%; }
+.ct-ph img { object-fit: cover; object-position: 50% 30%; transform: scale(1.06); transition: transform 1.6s var(--ease); }
+.ct-ph figcaption { position: absolute; left: 14px; right: 14px; bottom: 14px; display: grid; gap: 2px; padding: 14px 18px; border-radius: 16px;
+  background: rgba(14, 20, 48, .55); border: 1px solid rgba(255, 255, 255, .18); -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3); }
+.ct-ph figcaption b { font-size: 17px; font-weight: 700; }
+.ct-ph figcaption span { font-size: 13px; color: rgba(255, 255, 255, .75); }
+/* arrival */
+.contact .ct-copy > *, .contact .ct-ph { opacity: 0; transform: translateY(26px); transition: opacity .9s ease, transform 1s var(--ease); }
+.contact .ct-t { transition-delay: .08s; } .contact .ct-p { transition-delay: .16s; } .contact .ct-cards { transition-delay: .24s; } .contact .ct-ph { transition-delay: .12s; }
+.contact.in .ct-copy > *, .contact.in .ct-ph { opacity: 1; transform: none; }
+.contact.in .ct-ph img { transform: none; }
+@media (prefers-reduced-motion: reduce) { .contact .ct-copy > *, .contact .ct-ph, .ct-ph img { opacity: 1; transform: none; transition: none; } }
+@media (max-width: 860px) {                                        /* phones: the corretor first, then the heading and the cards */
+  .contact { min-height: 0; padding: 40px 16px 56px; }
+  .ct-in { grid-template-columns: 1fr; gap: 30px; }
+  .ct-ph { order: -1; justify-self: center; width: min(78vw, 330px); max-height: none; }
+  .ct-t { font-size: clamp(44px, 13vw, 60px); margin: 10px 0 12px; }
+  .ct-p { font-size: 15.5px; }
+  .ct-cards { max-width: none; }
+  .ct-card { grid-template-columns: 46px minmax(0, 1fr) auto; gap: 12px; padding: 12px 14px 12px 12px; }
+  .ct-ic { width: 46px; height: 46px; } .ct-ic svg { width: 22px; height: 22px; }
+  .ct-act { font-size: 0; gap: 0; } .ct-act i { font-size: 18px; }   /* phones: just the arrow */
+  .ct-tx b, .ct-ml { font-size: clamp(14px, 4.1vw, 17px); }
+  .ct-card #ctCopy { width: 40px; height: 40px; }
+  /* e-mail card: icon · label · copy on the first line, the whole address on its own line under them */
+  .ct-card-mail { row-gap: 8px; }
+  .ct-card-mail .ct-tx { display: contents; }
+  .ct-card-mail .ct-tx small { grid-column: 2; grid-row: 1; align-self: center; }
+  .ct-card-mail .ct-ml { grid-column: 1 / -1; grid-row: 2; padding-left: 4px; font-size: clamp(14px, 4.2vw, 17px); }
+  .ct-card-mail #ctCopy { grid-column: 3; grid-row: 1; }
+}
+/* about + FAQ: the readable facts of the launch (also what search engines read), between the contact and the footer */
+.info { position: relative; padding: clamp(40px, 9vh, 110px) clamp(20px, 6vw, 100px) clamp(20px, 4vh, 50px); color: #fff; }
+.info-in { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: clamp(32px, 6vw, 96px); }
+.info-t { margin: 14px 0 clamp(18px, 3vh, 30px); font-weight: 300; font-size: clamp(32px, 3.8vw, 64px); line-height: 1.04; letter-spacing: -.035em; }
+.info-t b { font-weight: 700; }
+.info-copy > p:not(.ct-k) { margin: 0 0 1em; max-width: 52ch; font-size: clamp(15px, 1.1vw, 17px); line-height: 1.7; color: rgba(255, 255, 255, .8); }
+.info-copy strong { font-weight: 700; color: #fff; }
+.info-copy .info-links { display: flex; flex-wrap: wrap; gap: 10px 26px; margin-top: 1.6em; }
+.info-links a { color: #fff; font-weight: 600; text-decoration: none; padding-bottom: 3px; border-bottom: 1px solid rgba(160, 215, 255, .6); transition: border-color .25s; }
+.info-links a:hover, .info-links a:focus-visible { border-color: #fff; outline: none; }
+.info-h { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: rgba(160, 215, 255, .9); }
+.info-faq details { border-bottom: 1px solid rgba(255, 255, 255, .16); }
+.info-faq summary { position: relative; list-style: none; cursor: pointer; padding: 18px 40px 18px 0; font-size: clamp(16px, 1.25vw, 19px); font-weight: 600; line-height: 1.35; }
+.info-faq summary::-webkit-details-marker { display: none; }
+.info-faq summary::after { content: ""; position: absolute; right: 6px; top: 50%; width: 9px; height: 9px; margin-top: -7px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(45deg); transition: transform .3s var(--ease); opacity: .8; }
+.info-faq details[open] summary::after { transform: translateY(4px) rotate(225deg); }
+.info-faq summary:focus-visible { outline: 2px solid rgba(160, 215, 255, .9); outline-offset: 4px; border-radius: 4px; }
+.info-faq details p { margin: 0 0 20px; max-width: 58ch; font-size: 15px; line-height: 1.7; color: rgba(255, 255, 255, .78); }
+@media (max-width: 860px) {
+  .info { padding: 30px 16px 10px; }
+  .info-in { grid-template-columns: 1fr; gap: 38px; }
+  .info-t { font-size: clamp(32px, 9.5vw, 44px); }
 }
 /* footer: tour links, then the Platinum logo across the whole width, the legal line */
 .foot { position: relative; overflow: hidden; padding: clamp(48px, 9vh, 96px) clamp(16px, 4vw, 64px) clamp(18px, 3vh, 30px); background: none; color: #fff; }   /* sits on .ct-bg with the contact */
@@ -597,4 +738,14 @@ html.walking .wa-fab { opacity: 0; pointer-events: none; }
 .instant *, .instant *::before, .instant *::after { animation-delay: 0s !important; animation-duration: 0s !important; }
 @media (prefers-reduced-motion: reduce) {
   .hero *, .hero *::before, .hero *::after { animation-delay: 0s !important; animation-duration: 0s !important; animation-iteration-count: 1 !important; }
+}
+/* DESKTOP ONLY (kept LAST in the file so nothing above overrides it): the scroll pills smaller and flat – no ring, no
+   shadow, a smaller arrow disc – and the "Sua próxima casa" statement centred. Phones keep the bold pills. */
+@media (min-width: 861px) {
+  .hint-b::after { display: none; }
+  .hint .hint-b, .feel-go, .say-go { gap: 10px; padding: 5px 5px 5px 18px; font-size: 11px; letter-spacing: .14em; box-shadow: none; }
+  .hint .hint-b i, .hint .hint-b:hover i, .hint .hint-b:focus-visible i, .feel-go i, .say-go i, .say-go:hover i, .say-go:focus-visible i { width: 30px; height: 30px; }
+  .hint .hint-b svg, .feel-go svg, .say-go svg { width: 13px; height: 13px; }
+  .say-in { justify-items: center; text-align: center; }
+  .say-t { margin: 0 auto; }
 }

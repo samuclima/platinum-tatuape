@@ -598,8 +598,50 @@ export function start(meta) {
   // map-pin glyph, and under the card a round navy marker whose tip is the sprite's anchor. Everything is opaque
   // (the sprites are alpha-tested cut-outs), so the card gets a solid hairline instead of a soft shadow.
   // dir ('l' | 'r' | 'u' | 'd'): edge version for a place outside the frame – text only, an arrow on that side
+  // dir 'n': the bare card (home page: its marker sits on the ground at the place, a line joins the two – see drawLinks)
   // photo: undefined = no picture · null = picture still loading (grey placeholder) · HTMLImageElement
+  // home page (EMBED): a small pill instead of the card – coloured dot, name, the walking time; no photo. The big cards
+  // with photos, two lines and edge cards made the hero too busy (user). dir l/r/u/d: a small arrow on that side.
+  // A round thumbnail at its start: the place's photo (photo: undefined = none → a light disc with the colour dot ·
+  // null = still loading → the light disc · HTMLImageElement).
+  function drawPill(title, sub, accent, dir, photo) {
+    const K = 2.75, c = document.createElement('canvas'), g = c.getContext('2d');
+    const NAVY = '#151c3a', tf = `700 ${13 * K}px ${LABEL_FONT}`, sf = `500 ${12 * K}px ${LABEL_FONT}`;
+    const measure = (txt, font) => { g.font = font; if ('letterSpacing' in g) g.letterSpacing = '0px'; return g.measureText(txt).width; };
+    const time = (sub.match(/\d+\s*min/) || [''])[0];                          // "Metrô L3 · 250 m · 2 min" → "2 min"
+    const tw = measure(title, tf), sw = time ? measure(time, sf) : 0;
+    const h = 38 * K, th = 30 * K, ti = (h - th) / 2, padL = ti + th + 9 * K, gap2 = 7 * K, padR = 14 * K, ext = 9 * K, bw = 1.2 * K;
+    const pillW = Math.ceil(padL + tw + (time ? gap2 + sw : 0) + padR);
+    const sideA = dir === 'l' || dir === 'r', vertA = dir === 'u' || dir === 'd';
+    const W = pillW + 4 * K + (sideA ? ext : 0), H = h + 4 * K + (vertA ? ext : 0);
+    c.width = W; c.height = H;
+    const x0 = 2 * K + (dir === 'l' ? ext : 0), y0 = 2 * K + (dir === 'u' ? ext : 0), my = y0 + h / 2;
+    g.fillStyle = '#ffffff'; g.beginPath(); g.roundRect(x0, y0, pillW, h, h / 2); g.fill();
+    g.strokeStyle = '#d5dae6'; g.lineWidth = bw; g.beginPath(); g.roundRect(x0 + bw / 2, y0 + bw / 2, pillW - bw, h - bw, (h - bw) / 2); g.stroke();
+    {                                                                          // the round thumbnail
+      const tx0 = x0 + ti, ty0 = y0 + ti, r = th / 2, tcx = tx0 + r, tcy = ty0 + r;
+      g.save(); g.beginPath(); g.arc(tcx, tcy, r, 0, Math.PI * 2); g.clip();
+      g.fillStyle = '#eef1f7'; g.fillRect(tx0, ty0, th, th);
+      if (photo) { const s = Math.max(th / photo.naturalWidth, th / photo.naturalHeight), iw = photo.naturalWidth * s, ih = photo.naturalHeight * s;
+        g.drawImage(photo, tcx - iw / 2, tcy - ih / 2, iw, ih); }
+      g.restore();
+      if (!photo) { g.fillStyle = accent === '#ffffff' || accent === '#c9d4e4' ? '#8b96b3' : accent; g.beginPath(); g.arc(tcx, tcy, 4.5 * K, 0, Math.PI * 2); g.fill(); }
+      else { g.strokeStyle = accent === '#ffffff' || accent === '#c9d4e4' ? '#c9d0e0' : accent; g.lineWidth = 1.6 * K; g.beginPath(); g.arc(tcx, tcy, r - 0.8 * K, 0, Math.PI * 2); g.stroke(); }   // a thin ring in the place's colour
+    }
+    g.textAlign = 'left'; g.textBaseline = 'middle';
+    let tx = x0 + padL;
+    measure('', tf); g.fillStyle = NAVY; g.fillText(title, tx, my + 0.5 * K);
+    if (time) { tx += tw + gap2; measure('', sf); g.fillStyle = '#6b7493'; g.fillText(time, tx, my + 0.5 * K); }
+    if (dir && dir !== 'n') {                                                  // off-frame: a small arrow towards the place
+      const ax = dir === 'l' ? x0 - 2 * K : dir === 'r' ? x0 + pillW + 2 * K : x0 + pillW / 2, ay = dir === 'u' ? y0 - 2 * K : dir === 'd' ? y0 + h + 2 * K : my;
+      const [fx, fy] = { l: [-1, 0], r: [1, 0], u: [0, -1], d: [0, 1] }[dir], a = 6 * K, b = 5 * K;
+      g.fillStyle = NAVY; g.beginPath(); g.moveTo(ax + fx * a, ay + fy * a); g.lineTo(ax - fy * b, ay + fx * b); g.lineTo(ax + fy * b, ay - fx * b); g.closePath(); g.fill();
+    }
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+    return { tex, aspect: W / H, h: H };
+  }
   function drawLabel(title, sub, accent, dir, photo) {
+    if (EMBED) return drawPill(title, sub, accent, dir, photo);
     const K = 2, c = document.createElement('canvas'), g = c.getContext('2d');
     const NAVY = '#151c3a', tf = `700 ${19 * K}px ${LABEL_FONT}`, sf = `500 ${13.5 * K}px ${LABEL_FONT}`;
     const measure = (txt, font) => { g.font = font; if ('letterSpacing' in g) g.letterSpacing = '0px'; return g.measureText(txt).width; };
@@ -633,10 +675,12 @@ export function start(meta) {
     g.fillStyle = '#ffffff'; g.beginPath(); g.arc(gx, gy, 1.8 * K, 0, Math.PI * 2); g.fill();
     measure('', sf); g.fillStyle = '#5d6685'; g.fillText(sub, x0 + pad + glyph, ty + 45.5 * K);
     if (dir) {                                                                // arrow towards the place, just outside the card
+      if (dir !== 'n') {
       const ax = dir === 'l' ? x0 - 3 * K : dir === 'r' ? x0 + cardW + 3 * K : x0 + cardW / 2, ay = dir === 'u' ? y0 - 3 * K : dir === 'd' ? y0 + cardH + 3 * K : y0 + cardH / 2;
       const [fx, fy] = { l: [-1, 0], r: [1, 0], u: [0, -1], d: [0, 1] }[dir], a = 8 * K, b = 7 * K;
       g.fillStyle = NAVY; g.beginPath();
       g.moveTo(ax + fx * a, ay + fy * a); g.lineTo(ax - fy * b, ay + fx * b); g.lineTo(ax + fy * b, ay - fx * b); g.closePath(); g.fill();
+      }
       const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
       return { tex, aspect: W / H, h: H };
     }
@@ -653,7 +697,7 @@ export function start(meta) {
   const LABEL_U = (EMBED ? 0.064 : 0.085) / 176 * (innerWidth < 700 ? 0.8 : 1);               // sprite height per canvas pixel (fraction of the viewport, sizeAttenuation off)
   const labels = [];
   const redraw = l => {                                         // fonts or the photo arrived → draw the card again
-    const old = l.tex; Object.assign(l, drawLabel(l.title, l.sub, l.color, undefined, l.photo));
+    const old = l.tex; Object.assign(l, drawLabel(l.title, l.sub, l.color, EMBED ? 'n' : undefined, l.photo));
     for (const k in l.edge) l.edge[k].tex.dispose(); l.edge = {};
     if (!l.sp.userData.edge) { l.sp.material.map = l.tex; l.sp.scale.set(LABEL_U * l.h * l.aspect, LABEL_U * l.h, 1); }
     l.sp.material.needsUpdate = true; old.dispose();
@@ -664,8 +708,9 @@ export function start(meta) {
     const extra = EMBED && title === 'Marginal Tietê';                 // home page: the one far place kept (user), with its photo on its edge card
     if (EMBED && !near && !extra) return;                             // home page: otherwise only the places near the tower (the far ones made it too busy)
     if (extra) height = 36;                                          // a short pin: its card sits low, near the ground, not up in the sky
+    if (EMBED) height = Math.min(height, 34);                         // home page: the pills float low, short lines (not up in the sky)
     const mat = std({ color: '#e8edf3', emissive: color, emissiveIntensity: 0.35, metalness: 0.6, roughness: 0.3 }), parent = city ? cityG : siteW;
-    if (pole) {
+    if (pole && !EMBED) {                                              // (home page: a drawn line + ground marker instead, see drawLinks)
       const p = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, height, 10), mat);
       p.position.set(x, GROUND + height / 2, z); parent.add(p);
       const head = new THREE.Mesh(new THREE.SphereGeometry(1.3, 20, 14), std({ color, emissive: color, emissiveIntensity: 0.6 }));
@@ -673,15 +718,15 @@ export function start(meta) {
       mat.userData.pin = head.material.userData.pin = true;             // tag (survives the mesh merge): H hides the poles with the labels
     }
     const photo = img ? null : undefined;
-    const { tex, aspect, h } = drawLabel(title, sub, color, undefined, photo);
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, sizeAttenuation: false, toneMapped: false, fog: false, transparent: false, alphaTest: 0.5 }));   // opaque cut-out: blended sprites came out washed in the composer path
+    const { tex, aspect, h } = drawLabel(title, sub, color, EMBED ? 'n' : undefined, photo);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, sizeAttenuation: false, toneMapped: false, fog: false, transparent: false, alphaTest: 0.5, depthTest: !EMBED }));   // opaque cut-out: blended sprites came out washed in the composer path · home page: always on top (a far pill was cut by the buildings in front)
     sp.center.set(0.5, 0); sp.scale.set(LABEL_U * h * aspect, LABEL_U * h, 1); sp.position.set(x, GROUND + height + 1, z);
     sp.renderOrder = 10;
     (city ? labelCity : labelSite).add(sp);
-    const l = { sp, title, sub, color, tex, aspect, h, edge: {}, near, photo, edgeOk: near || extra, edgePhoto: extra };   // edgeOk: rides the screen edge when off-frame · edgePhoto: keeps its photo there
+    const l = { sp, title, sub, color, tex, aspect, h, edge: {}, near, photo, edgeOk: EMBED ? extra : near /* home page: only Marginal Tietê (kept on purpose) rides the screen edge; the others show only when they are in the frame */, edgePhoto: EMBED && extra, lift: height + 1 };   // edgeOk: rides the screen edge when off-frame · edgePhoto: keeps its photo there
     labels.push(l); sp.userData.label = l; sp.userData.home = sp.position.clone();
     if (title !== 'PLATINUM') pinSprites.push(sp);                       // (the building's own label stays on its roof)
-    if (img) { const im = new Image(); im.onload = () => { l.photo = im; redraw(l); }; im.src = `home/places/${img}.jpg`; }   // photos: Wikimedia Commons, see home/places/CREDITS.txt
+    if (img) { const im = new Image(); im.decoding = 'async'; im.onload = () => { l.photo = im; redraw(l); }; im.src = `home/places/${img}.jpg`; }   // photos: Wikimedia Commons, see home/places/CREDITS.txt (home page: only the few pills shown, ~30 KB each)
   }
   // redraw once Manrope has arrived (the first draw may have used the fallback font)
   document.fonts?.load(`700 38px ${LABEL_FONT}`).then(() => document.fonts.load(`500 27px ${LABEL_FONT}`)).then(() => { labels.forEach(redraw); }).catch(() => {});
@@ -1113,7 +1158,7 @@ export function start(meta) {
       if (Math.abs(vx) < 1e-6 && Math.abs(vy) < 1e-6) vy = 1;
       const dir = Math.abs(vx) * (H / 2) > Math.abs(vy) * (W / 2) ? (vx < 0 ? 'l' : 'r') : (vy < 0 ? 'u' : 'd');
       // top edge: the normal card with its marker pointing DOWN to the ground (an up arrow read as "in the sky"); other edges: arrow card
-      const e = dir === 'u' ? { tex: l.tex, aspect: l.aspect, h: l.h } : l.edge[dir] || (l.edge[dir] = drawLabel(l.title, l.sub, l.color, dir, l.edgePhoto ? l.photo : undefined));   // edge cards: text only (Marginal Tietê: with its photo)
+      const e = dir === 'u' && !EMBED ? { tex: l.tex, aspect: l.aspect, h: l.h } : dir === 'u' ? l.edge.u || (l.edge.u = drawLabel(l.title, l.sub, l.color, undefined, l.photo)) : l.edge[dir] || (l.edge[dir] = drawLabel(l.title, l.sub, l.color, dir, l.edgePhoto ? l.photo : undefined));   // edge cards: text only (Marginal Tietê: with its photo)
       const sh = LABEL_U * e.h, w = sh * e.aspect * P[0] * W / 2, h = sh * P[5] * H / 2;
       const hx = cx - w / 2 - PAD, hy = cy - h / 2 - PAD;                      // where the label centre may go
       const t = Math.min(hx / Math.max(Math.abs(vx), 1e-6), hy / Math.max(Math.abs(vy), 1e-6));
@@ -1130,25 +1175,24 @@ export function start(meta) {
       const first = side[0], under = PAD - (first[key] - sz(first) / 2);
       if (under > 0) side.forEach(q => { q[key] += under; });
     }
-    const BOT = EMBED ? (W < 700 ? 96 : 64) : PAD;                                           // home page: the bottom-edge cards stay above the "Arraste para girar" hint
+    const BOT = EMBED ? (W < 700 ? 144 : 64) : PAD;                                           // home page: the bottom-edge cards stay above the "Arraste para girar" hint
     for (const q of put) if (q.dir === 'd') q.py = Math.min(q.py, H - BOT - q.h / 2);
     for (const { sp, e, sh, px, py } of put) {
       _lv.set(px / W * 2 - 1, 1 - py / H * 2, 0.5).unproject(cam).sub(cam.position).normalize();
       _lv.multiplyScalar(Math.max(cam.near * 4, 2)).add(cam.position);
       sp.parent.worldToLocal(_lv); sp.position.copy(_lv);
       sp.center.set(0.5, 0.5); sp.scale.set(sh * e.aspect, sh, 1);
-      sp.material.map = e.tex; sp.material.depthTest = false; sp.userData.edge = true;
-    }
+      sp.material.map = e.tex; sp.material.depthTest = false; sp.userData.edge = true;    }
   }
   function keepLabelsOffTower(cam) {
     const hull = towerHull(cam);
     for (const sp of pinSprites) {                                          // back to the normal label on its own spot
       const l = sp.userData.label; sp.center.set(0.5, 0); sp.position.copy(sp.userData.home);
-      if (sp.userData.edge) { sp.userData.edge = false; sp.material.map = l.tex; sp.scale.set(LABEL_U * l.h * l.aspect, LABEL_U * l.h, 1); sp.material.depthTest = true; }
+      if (sp.userData.edge) { sp.userData.edge = false; sp.material.map = l.tex; sp.scale.set(LABEL_U * l.h * l.aspect, LABEL_U * l.h, 1); sp.material.depthTest = !EMBED; }
       sp.material.visible = true;
     }
     if (aerialView) edgeLabels(cam);
-    if (!hull) return;
+    if (!hull) { clampPills(cam); return; }
     const n = hull.length, inHull = (x, y) => { for (let i = 0; i < n; i++) { const a = hull[i], b = hull[(i + 1) % n]; if ((b[0] - a[0]) * (y - a[1]) - (b[1] - a[1]) * (x - a[0]) < 0) return false; } return true; };
     const span = (lo, hi, axis) => {                                        // hull extent along the other axis for a band [lo, hi]
       let mn = Infinity, mx = -Infinity; const o = 1 - axis;
@@ -1193,6 +1237,64 @@ export function start(meta) {
       sp.material.visible = !off;
       if (!off) placed.push([x0, x1, y1 - h, y1]);
     }
+    clampPills(cam);
+  }
+  // home page: a pill never hangs off the side of the screen – slid back in (its line still reaches its place), or hidden
+  // when the place itself is outside the frame (only Marginal Tietê rides the edge, as an edge pill)
+  function clampPills(cam) {
+    if (!EMBED) return;
+    const P = cam.projectionMatrix.elements, W = innerWidth, lo = 6;
+    for (const sp of pinSprites) {
+      if (!sp.visible || !sp.parent?.visible || sp.userData.edge || !sp.material.visible) continue;
+      sp.getWorldPosition(_lv).project(cam); if (_lv.z > 1) continue;
+      const ax = (_lv.x + 1) / 2 * W, w = sp.scale.x * P[0] * W / 2;
+      if (ax < 0 || ax > W) { sp.material.visible = false; continue; }
+      const x0 = ax - w * sp.center.x;
+      if (x0 < lo) sp.center.x = (ax - lo) / w; else if (x0 + w > W - lo) sp.center.x = (ax - (W - lo - w)) / w;    }
+  }
+  // home page: every card in the frame is tied to its place – a round marker lying on the ground at the real spot
+  // and a line from it up to the card, wherever the card was nudged to (off the tower / off another card). Drawn in
+  // an SVG over the canvas so both stay crisp and the same size at any distance. A place behind the tower is dimmed.
+  const linkSvg = EMBED ? document.body.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'svg')) : null;
+  if (linkSvg) linkSvg.setAttribute('style', 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible');
+  const _lg = new THREE.Vector3(), _lt = new THREE.Vector3();
+  function drawLinks(cam) {
+    const W = innerWidth, H = innerHeight, P = cam.projectionMatrix.elements, k = W < 700 ? 0.85 : 1, NS = 'http://www.w3.org/2000/svg';
+    const hull = towerHull(cam), n = hull ? hull.length : 0;
+    const inHull = (x, y) => { for (let i = 0; i < n; i++) { const a = hull[i], b = hull[(i + 1) % n]; if ((b[0] - a[0]) * (y - a[1]) - (b[1] - a[1]) * (x - a[0]) < 0) return false; } return n > 0; };
+    _lt.set(TOWER_C[0], GROUND, TOWER_C[1]).applyMatrix4(siteW.matrixWorld); const dTower = _lt.distanceToSquared(cam.position);
+    for (const sp of pinSprites) {
+      const l = sp.userData.label;
+      if (!l.link) {
+        const g = document.createElementNS(NS, 'g'), mk = (tag, at) => { const e = document.createElementNS(NS, tag); for (const a in at) e.setAttribute(a, at[a]); g.appendChild(e); return e; };
+        const dot = l.color === '#ffffff' || l.color === '#c9d4e4' ? '#aeb9d6' : l.color;
+        l.link = { g, halo: mk('ellipse', { fill: '#151c3a', 'fill-opacity': .16 }), under: mk('line', { stroke: '#fff', 'stroke-linecap': 'round' }), line: mk('line', { stroke: '#151c3a', 'stroke-linecap': 'round' }),
+          ring: mk('circle', { fill: '#151c3a', stroke: '#fff' }), core: mk('circle', { fill: dot }), end: mk('circle', { fill: '#151c3a', stroke: '#fff' }) };
+        linkSvg.appendChild(g);
+      }
+      const L = l.link; let show = labelGroup.visible && sp.visible && sp.material.visible && !sp.userData.edge && !document.body.classList.contains('clean');
+      if (show) {
+        _lg.copy(sp.userData.home); _lg.y -= l.lift; sp.parent.localToWorld(_lg); const far = _lg.distanceToSquared(cam.position) > dTower;
+        _lg.project(cam); const gx = (_lg.x + 1) / 2 * W, gy = (1 - _lg.y) / 2 * H;
+        sp.getWorldPosition(_lv).project(cam);
+        if (_lg.z > 1 || _lv.z > 1 || gx < -20 || gx > W + 20 || gy < -20 || gy > H + 20) show = false;
+        else {
+          const ax = (_lv.x + 1) / 2 * W, ay = (1 - _lv.y) / 2 * H, w = sp.scale.x * P[0] * W / 2, h = sp.scale.y * P[5] * H / 2;
+          const x0 = ax - w * sp.center.x, x1 = x0 + w, y1 = ay + sp.center.y * h, y0 = y1 - h, m = Math.min(16 * k, w / 2);
+          const sx = Math.min(x1 - m, Math.max(x0 + m, gx)), sy = gy > y1 ? y1 - 2 : gy < y0 ? y0 + 2 : (y0 + y1) / 2;   // nearest point of the card to the marker
+          const set = (e, at) => { for (const a in at) e.setAttribute(a, typeof at[a] === 'number' ? at[a].toFixed(1) : at[a]); };
+          const inCard = gx > x0 && gx < x1 && gy > y0 && gy < y1;
+          for (const e of [L.under, L.line]) set(e, { x1: sx, y1: sy, x2: gx, y2: gy, visibility: inCard ? 'hidden' : 'visible' });
+          // quiet: a thin line and a small dot on the ground (no halo, no end bead)
+          set(L.under, { 'stroke-width': 3.2 * k, 'stroke-opacity': .8 }); set(L.line, { 'stroke-width': 1.3 * k, 'stroke-opacity': .55 });
+          set(L.halo, { cx: gx, cy: gy, rx: 0, ry: 0 });
+          set(L.ring, { cx: gx, cy: gy, r: 4.6 * k, 'stroke-width': 1.6 * k }); set(L.core, { cx: gx, cy: gy, r: 1.8 * k });
+          set(L.end, { cx: sx, cy: sy, r: 0, visibility: 'hidden' });
+          L.g.setAttribute('opacity', far && inHull(gx, gy) ? '.3' : '1');
+        }
+      }
+      const d = show ? '' : 'none'; if (L.shown !== d) { L.g.style.display = d; L.shown = d; }
+    }
   }
   let frameHook = null, inside = false, paused = false;                     // ?embed=home: camera driver / journey camera inside the térreo
   renderer.setAnimationLoop(() => {
@@ -1215,6 +1317,7 @@ export function start(meta) {
     updateHud(); drawMap();
     const cam = topView ? topCam : camera;
     keepLabelsOffTower(cam);
+    if (linkSvg) drawLinks(cam);
     if (quality) {
       // Ultra, walking: SSR draws the scene itself (renderPass off). Its target has no depth for the city labels, so they
       // sit out while walking; the top / aerial views keep the normal path with labels.
@@ -1236,15 +1339,16 @@ export function start(meta) {
     document.head.appendChild(st);
     dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyM' })); dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyM' }));
     labelGroup.visible = true;                                 // nearby places (pins within CLOSE m) ride along with the orbit
-    const c = window.apt.tower, ang = EMB === 'home' ? Math.PI + 0.6 : 0.6, R = 175;   // home: the fly-in ends over Praça Heitor Levi, on the entrance side
-    topCam.position.set((c.cx + Math.sin(ang) * R) * SCALE, (c.ground + 95) * SCALE, (c.cz + Math.cos(ang) * R) * SCALE);
+    const TALL = innerWidth < innerHeight * 0.8;                 // phones held upright: the frame is narrow → stand farther out and higher, so the places around the tower fit in it (up close the tower filled the width and every place became an edge card on top of it)
+    const c = window.apt.tower, ang = EMB === 'home' ? Math.PI + 0.6 : 0.6, R = TALL ? 300 : 175, CAM_H = TALL ? 250 : 95;   // home: the fly-in ends over Praça Heitor Levi, on the entrance side
+    topCam.position.set((c.cx + Math.sin(ang) * R) * SCALE, (c.ground + CAM_H) * SCALE, (c.cz + Math.cos(ang) * R) * SCALE);
     orbit.target.set(c.cx * SCALE, (c.ground + 34) * SCALE, c.cz * SCALE);
     orbit.autoRotate = true; orbit.autoRotateSpeed = 0.75; orbit.enableZoom = false; orbit.update();
     embedMode = true;
     // light mode: from the air the contact-shadow pass changes nothing visible → render direct (native MSAA) and
     // give its buffers back; the frame-time watchdog can still lower the resolution on slow devices
     quality = false; composer.setSize(1, 1);
-    if (EMB === 'home') { whiteCity(); homeIntro(c, ang, R); }
+    if (EMB === 'home') { whiteCity(); homeIntro(c, ang, R, CAM_H); }
     requestAnimationFrame(() => requestAnimationFrame(() => { parent.postMessage('platinum-3d-ready', location.origin); if (EMB === 'home' && !new URLSearchParams(location.search).has('t')) paused = true; }));   // first frames drawn (shaders compiled) → the home page takes over
   }
 
@@ -1324,7 +1428,7 @@ export function start(meta) {
   // ?embed=home – the home page hero. Waits (paused) far out over the city; on {type:'intro'} it flies in on a
   // descending spiral and settles into the slow 360° orbit. {type:'pause', on} stops / resumes rendering while the
   // page covers it. ?t skips the intro (screenshots).
-  function homeIntro(c, ang1, R1) {
+  function homeIntro(c, ang1, R1, H1) {
     const V = (x, y, z) => new THREE.Vector3(x, y, z);
     const tgtO = V(c.cx, c.ground + 34, c.cz);
     const orbitAt = (a, R, h) => V(c.cx + Math.sin(a) * R, c.ground + h, c.cz + Math.cos(a) * R);
@@ -1349,7 +1453,7 @@ export function start(meta) {
     frameHook = rawDt => {
       if (introT < 0 || introT >= 1) return;
       introT = Math.min(1, introT + Math.min(rawDt, 0.1) / INTRO); const e = ease(introT);
-      topCam.position.copy(orbitAt(ang1 - 2.6 * (1 - e), 1300 + (R1 - 1300) * e, 620 + (95 - 620) * e)).multiplyScalar(SCALE);
+      topCam.position.copy(orbitAt(ang1 - 2.6 * (1 - e), 1300 + (R1 - 1300) * e, 620 + (H1 - 620) * e)).multiplyScalar(SCALE);
       orbit.target.copy(tgtO).multiplyScalar(SCALE);
       if (introT === 1) orbit.autoRotate = true;
     };
