@@ -114,7 +114,7 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
   const mini = document.getElementById('mini'), spotsEl = document.getElementById('spots'), side = document.getElementById('side'), detail = document.getElementById('detail');
   const stack = document.getElementById('stack'), mag = document.getElementById('mag');
   const $ = id => document.getElementById(id), two = n => String(n).padStart(2, '0');
-  let lv = 0, PLACES = LEVELS[0].places, btns = [], cur = -1, swap = 0, view = null, goals = { lift: [0, 0, 0], fade: [0, 0, 0], active: 0, scroll: 0 };   // (set by onStack)
+  let lv = 0, PLACES = LEVELS[0].places, btns = [], cur = -1, swap = 0, view = null, fbImg = null, goals = { lift: [0, 0, 0], fade: [0, 0, 0], active: 0, scroll: 0 };   // (set by onStack)
   const makeSpots = () => {
     spotsEl.replaceChildren();
     btns = PLACES.map(([, title], i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'spot'; b.textContent = i + 1; b.title = title; b.setAttribute('aria-label', title);
@@ -130,7 +130,7 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
     i = (i + PLACES.length) % PLACES.length; const [id, title, desc, img] = PLACES[i], first = cur < 0; cur = i;
     btns.forEach((b, k) => b.classList.toggle("sel", k === i)); view?.pick(id);
     detail.classList.remove('show'); clearTimeout(swap);
-    $('dNum').textContent = two(i + 1); $('dOf').textContent = ' / ' + two(PLACES.length); $('dLv').textContent = LEVELS[lv].title;
+    $('dNum').textContent = two(i + 1); $('dOf').textContent = ' / ' + two(PLACES.length);
     // progress: one quiet segment per place of this floor (an indicator, not more buttons)
     const prog = $('dProg');
     if (prog.children.length !== PLACES.length || prog.dataset.lv !== String(lv)) {
@@ -165,6 +165,7 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
     $('fTitle').textContent = L.title; $('fSub').textContent = L.sub;
     $('tag').textContent = (matchMedia('(hover: hover)').matches ? 'Clique' : 'Toque') + ' nos pontos do mapa';   // short: one line beside the "next floor" link
     $('stackGo').querySelector('span').textContent = lv < LEVELS.length - 1 ? 'Próximo pavimento' : 'Continuar';   // says where it goes
+    if (fbImg) fbImg.src = `home/feel/${['fachada', 't-massagem', 'piscina'][lv]}.jpg`;   // no-WebGL fallback picture follows the floor
   }
   writeLevel();
   // swipe the photo: next / previous place (phones; a mouse drag does nothing)
@@ -385,7 +386,10 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
     addEventListener('keydown', e => { if (e.key === 'Escape' && cur && !document.fullscreenElement) closeWalk(); });
   }
   addEventListener('scroll', onStack, { passive: true }); addEventListener('resize', onStack); onStack();
-  const fallback = () => { mini.innerHTML = '<img alt="Perspectiva ilustrada do acesso do Platinum Tatuapé" src="home/feel/acesso.jpg" />'; };
+  // no WebGL2 / the model failed: a render of the level in place of the 3D plan. The title, the floor switch and the
+  // "next floor" link stay (the script keeps using them), only the canvas and the numbered points go.
+  const FB = ['fachada', 't-massagem', 'piscina'];   // (not the first place's own picture, which shows in the card beside it)
+  const fallback = () => { if (fbImg) return; mini.classList.add('nogl'); fbImg = new Image(); fbImg.decoding = 'async'; fbImg.alt = 'Perspectiva ilustrada do Platinum Tatuapé'; fbImg.src = `home/feel/${FB[lv]}.jpg`; mini.prepend(fbImg); const tg = mini.querySelector('.ill-mini'); if (tg) tg.textContent = 'Perspectiva ilustrativa'; };
   new IntersectionObserver((es, o) => {
     if (!es.some(e => e.isIntersecting)) return; o.disconnect();
     import(new URL('home/mini3d.js', document.baseURI).href).then(m => m.mini3d(document.getElementById('miniC'), { urls: ['home/terreo-mini.bin', 'home/pav1-mini.bin', 'home/pav2-mini.bin'], yaw: MINI_YAW, pitch: 1.5707,
@@ -396,7 +400,7 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
 // scroll: hide the hint; stop rendering the 360° once the panel covers it completely (phones / old computers)
 let raf = 0, covered = false;
 addEventListener('scroll', () => {
-  if (!lifted || raf) return;
+  if ((!lifted && body.classList.contains('has3d')) || raf) return;   // (with the 3D: only once the hero has lifted; without it: always)
   raf = requestAnimationFrame(() => {
     raf = 0;
     hint.classList.toggle('gone', scrollY > 24);
