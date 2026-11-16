@@ -638,8 +638,8 @@ html.walking .wa-fab { opacity: 0; pointer-events: none; }
     linear-gradient(180deg, #1f3f86 0%, #1a2d66 40%, #151c3a 72%, #0e1430 100%); }
 /* contact – clear and personal: on the left the heading, a line, and three contact cards (icon · label + value · action);
    on the right the corretor in a large portrait card with a caption. It rises into view once (.in, set in JS). */
-.contact { position: relative; display: grid; align-items: center; min-height: 100vh; min-height: 100svh; color: #fff;
-  padding: clamp(64px, 11vh, 130px) clamp(20px, 5vw, 80px); box-sizing: border-box; }
+.contact { position: relative; display: grid; align-items: center; color: #fff;
+  padding: clamp(64px, 11vh, 130px) clamp(20px, 5vw, 80px) clamp(28px, 5vh, 56px); box-sizing: border-box; }
 .ct-in { width: 100%; max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; gap: clamp(32px, 6vw, 100px); }
 .ct-copy { min-width: 0; }
 .ct-k { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: rgba(160, 215, 255, .9); }
@@ -688,7 +688,7 @@ a.ct-card-wa:hover, a.ct-card-wa:focus-visible { background: #3ee07d; border-col
 .contact.in .ct-ph img { transform: none; }
 @media (prefers-reduced-motion: reduce) { .contact .ct-copy > *, .contact .ct-ph, .ct-ph img { opacity: 1; transform: none; transition: none; } }
 @media (max-width: 860px) {                                        /* phones: the corretor first, then the heading and the cards */
-  .contact { min-height: 0; padding: 40px 16px 56px; }
+  .contact { min-height: 0; padding: 40px 16px 24px; }
   .ct-in { grid-template-columns: 1fr; gap: 30px; }
   .ct-ph { order: -1; justify-self: center; width: min(78vw, 330px); max-height: none; }
   .ct-t { font-size: clamp(44px, 13vw, 60px); margin: 10px 0 12px; }
@@ -761,7 +761,7 @@ a.ct-card-wa:hover, a.ct-card-wa:focus-visible { background: #3ee07d; border-col
 
 /* ===== the info section, editorial: big split headline, silver numbers, numbered lists, staggered reveal ===== */
 .ix { --hair: rgba(255, 255, 255, .14); --dim: rgba(226, 236, 255, .62); --cy: rgba(160, 215, 255, .9);
-  position: relative; padding: clamp(48px, 9vh, 110px) clamp(20px, 6vw, 100px) clamp(24px, 5vh, 60px); color: #fff; }
+  position: relative; padding: clamp(28px, 5vh, 64px) clamp(20px, 6vw, 100px) clamp(24px, 5vh, 60px); color: #fff; }
 .ix-wrap { max-width: 1320px; margin: 0 auto; }
 .ix-k { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .26em; text-transform: uppercase; color: var(--cy); }
 .ix-head { display: grid; gap: clamp(18px, 3vh, 28px); }
@@ -861,7 +861,7 @@ a.ct-card-wa:hover, a.ct-card-wa:focus-visible { background: #3ee07d; border-col
   .ix-spec dl { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 600px) {
-  .ix { padding: 44px 16px 16px; }
+  .ix { padding: 28px 16px 16px; }
   .ix-t { font-size: clamp(34px, 10vw, 46px); }
   .ix-stats li { padding-bottom: 4px; }
   .ix-stats b { font-size: clamp(36px, 11vw, 52px); }
