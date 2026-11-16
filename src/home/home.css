@@ -773,7 +773,7 @@ a.ct-card-wa:hover, a.ct-card-wa:focus-visible { background: #3ee07d; border-col
   background-image: linear-gradient(100deg, #fff 0%, #d9dde3 30%, #fff 48%, #c2c7cf 70%, #eef0f3 100%); background-size: 220% 100%; animation: ixShine 7s ease-in-out infinite; }
 @keyframes ixShine { 0%, 100% { background-position: 0 0; } 50% { background-position: 100% 0; } }
 
-.ix-stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); }
+.ix-stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); padding-bottom: clamp(20px, 3vh, 34px); border-bottom: 1px solid var(--hair); }
 .ix-stats li { padding: clamp(20px, 3vh, 34px) clamp(12px, 2vw, 28px) 0 0; border-right: 1px solid var(--hair); }
 .ix-stats li + li { padding-left: clamp(16px, 2vw, 28px); }
 .ix-stats li:last-child { border-right: 0; }
