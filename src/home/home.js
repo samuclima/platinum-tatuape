@@ -41,8 +41,8 @@ const gl = (() => { try {
 // around the tower, so playing it = the slow orbit and dragging scrubs it = turning by hand. Works on any phone (no
 // WebGL); Data Saver gets the still poster only.
 let introDone = false, ready3d = false, lifted = false, covered = false, held = false;
-// the phone (portrait) video is still rendering: every screen uses the wide one (cropped to fill) until it is uploaded
-const HV = 'hero-wide';
+// portrait screens (phones) get the tall render (1080×1920, the live hero's phone framing), the rest the wide one
+const HV = innerWidth < innerHeight * 0.8 ? 'hero-tall' : 'hero-wide';
 const ORBIT_RATE = 0.5;   // the video turns 360° in 40 s; half speed = the live hero's slow orbit
 body.classList.add('has3d');
 frame.poster = `home/${HV}.jpg`;
@@ -52,7 +52,7 @@ var fail = 0;
 if (!navigator.connection?.saveData) {
   // the smallest file the device decodes in hardware: AV1 (recent phones / PCs) → HEVC (Apple) → H.264 720p (all)
   const ok = async codecs => { if (!frame.canPlayType(`video/mp4; codecs="${codecs}"`)) return false;
-    try { const r = await navigator.mediaCapabilities.decodingInfo({ type: 'file', video: { contentType: `video/mp4; codecs="${codecs}"`, width: 1920, height: 1080, bitrate: 2e6, framerate: 24 } });
+    try { const r = await navigator.mediaCapabilities.decodingInfo({ type: 'file', video: { contentType: `video/mp4; codecs="${codecs}"`, width: HV === 'hero-tall' ? 1080 : 1920, height: HV === 'hero-tall' ? 1920 : 1080, bitrate: 2e6, framerate: 24 } });
       return r.supported && r.smooth && r.powerEfficient; } catch { return false; } };
   const set = c => { frame.src = `home/${HV}-${c}.mp4`; frame.load(); sync(); };
   // a file that fails to load falls back to H.264 (plays everywhere); if that fails too the poster simply stays
