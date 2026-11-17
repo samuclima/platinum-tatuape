@@ -41,24 +41,24 @@ const gl = (() => { try {
 // around the tower, so playing it = the slow orbit and dragging scrubs it = turning by hand. Works on any phone (no
 // WebGL); Data Saver gets the still poster only.
 let introDone = false, ready3d = false, lifted = false, covered = false, held = false;
-let HV = innerWidth < innerHeight * 0.8 ? 'hero-tall' : 'hero-wide';
+// the phone (portrait) video is still rendering: every screen uses the wide one (cropped to fill) until it is uploaded
+const HV = 'hero-wide';
 const ORBIT_RATE = 0.5;   // the video turns 360° in 40 s; half speed = the live hero's slow orbit
 body.classList.add('has3d');
 frame.poster = `home/${HV}.jpg`;
-const ready = () => { if (ready3d) return; ready3d = true; sceneEl.classList.add('ready'); maybeLift(); };
-if (navigator.connection?.saveData) ready();
-else {
-  frame.addEventListener('canplay', ready, { once: true });
-  // phone video missing (not uploaded yet) → the desktop one, cropped; any other failure → the poster stays
-  frame.addEventListener('error', () => { if (HV === 'hero-tall') { HV = 'hero-wide'; frame.poster = `home/${HV}.jpg`; frame.src = frame.src.replace('hero-tall', HV); } else ready(); });
+// the page NEVER waits for the video: the hero lifts as soon as the logo intro ends; the poster shows until frames arrive
+ready3d = true; sceneEl.classList.add('ready');
+var fail = 0;
+if (!navigator.connection?.saveData) {
   // the smallest file the device decodes in hardware: AV1 (recent phones / PCs) → HEVC (Apple) → H.264 720p (all)
-  const W = HV === 'hero-tall' ? [1080, 1920] : [1920, 1080];
   const ok = async codecs => { if (!frame.canPlayType(`video/mp4; codecs="${codecs}"`)) return false;
-    try { const r = await navigator.mediaCapabilities.decodingInfo({ type: 'file', video: { contentType: `video/mp4; codecs="${codecs}"`, width: W[0], height: W[1], bitrate: 2e6, framerate: 24 } });
-      return r.supported && r.smooth && r.powerEfficient; } catch { return codecs.startsWith('hvc1'); } };
-  (async () => frame.src = `home/${HV}-${await ok('av01.0.08M.08') ? 'av1' : await ok('hvc1.1.6.L120.90') ? 'hevc' : 'h264'}.mp4`)();
+    try { const r = await navigator.mediaCapabilities.decodingInfo({ type: 'file', video: { contentType: `video/mp4; codecs="${codecs}"`, width: 1920, height: 1080, bitrate: 2e6, framerate: 24 } });
+      return r.supported && r.smooth && r.powerEfficient; } catch { return false; } };
+  const set = c => { frame.src = `home/${HV}-${c}.mp4`; frame.load(); sync(); };
+  // a file that fails to load falls back to H.264 (plays everywhere); if that fails too the poster simply stays
+  frame.addEventListener('error', () => { if (!frame.src.endsWith('-h264.mp4')) set('h264'); });
+  (async () => set(await ok('av01.0.08M.08') ? 'av1' : await ok('hvc1.1.6.L120.90') ? 'hevc' : 'h264'))().catch(() => set('h264'));
 }
-var fail = setTimeout(ready, 12000);   // slow network: lift onto the poster, the video fades in when it can
 const playing = () => lifted && !covered && !held && !document.hidden;
 const sync = () => { if (playing()) { frame.playbackRate = ORBIT_RATE; frame.play().catch(() => {}); } else frame.pause(); };
 function maybeLift() {
