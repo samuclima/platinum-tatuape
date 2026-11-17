@@ -1048,7 +1048,7 @@ export function start(meta) {
   window.apt = {
     tower: (([cx, cz]) => ({ cx, cz, ground: GROUND }))(sw(TX0 + TW / 2, zN - TL / 2)),
     THREE, camera, setScale, setFov, colliders, planLines, blocked, X, Z, gtao, bloom, ssr, grade, topCam,
-    ultra() { autoOn = false; autoLevel = 0; quality = true; setUltra(true); },   // tools/bake_pano.mjs: Ultra without the toast
+    ultra() { autoOn = false; autoLevel = 0; quality = true; embedMode = false; setUltra(true); },   // tools/bake_pano.mjs: Ultra without the toast (tools/herovid_tmp.mjs: also on the home hero, which otherwise renders direct)
     high() { autoOn = false; autoLevel = 0; quality = true; setUltra(false); },   // tools/bake_visit.mjs: High, no automatic downgrade
     orbit, renderer, composer, scene, labelGroup, levelG, ceilingGroup,
     rooms: meta.rooms, eye: EYE,                                // (tools/bake_pano.mjs: one 360° panorama per room)
