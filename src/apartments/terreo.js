@@ -185,8 +185,8 @@ export function build() {
     { from: 878, to: 902, top: 2.4, glass: 'open' },                     // pet care → pet place (glass door, plan)
   ]);
   wl(568, 349, 572, 457); wl(858, 349, 862, 457); wl(913, 349, 917, 457, [{ from: 433, to: 453 }], M.wall, LH);   // pet care → lobby 2 (plan)
-  wl(440, 455, 917, 459, [{ from: 495, to: 535 }, { from: 630, to: 659, glass: 'open', top: 2.4 }]);
-  wl(438, 343, 443, 455, [{ from: 395, to: 440 }], M.wall, LH);         // lobby ↔ coworking door
+  wl(440, 455, 917, 459, [{ from: 443, to: 461 }, { from: 630, to: 659, glass: 'open', top: 2.4 }]);   // coworking door at its lobby-side corner (plan) | casa de campo
+  wl(438, 343, 443, 455, [], M.wall, LH);                               // lobby | coworking: solid (plan – the coworking is entered from the hall)
   wl(438, 300, 443, 343, [], M.wall, LH);                                 // lobby east wall continues north to the façade (plan) – closes the patio side
   // lobby 2 (05, by the parking): churrasqueira door, parking door
   wl(917, 351, 1001, 357, [{ from: 921, to: 962, sill: 0.15, top: LH - 0.15, glass: 'fixed' }, { from: 964, to: 1000, top: 2.4, glass: 'open' }], M.wall, LH);   // tall glazing to the terrace
@@ -212,8 +212,8 @@ export function build() {
     for (const [a, c] of [[481, 627], [661, 819], [856, 959]]) C.stone(a, c, S, 'S');
     C.lifts([501, 551, 601, 881, 929], clad, 'T');
     C.door(734, clad, 'S', 1.0, 'ESCADA');
-    // room side (north wall, face iy 459): openings at 495–535 (coworking) and 630–659 (casa de campo)
-    C.plaster(444, 493, N, 'N'); C.cove(444, 493, N + 0.018 * 18.33, 'N');
+    // room side (north wall, face iy 459): openings at 443–461 (coworking) and 630–659 (casa de campo)
+    C.plaster(463, 536, N, 'N'); C.cove(463, 536, N + 0.018 * 18.33, 'N');
     C.slats(538, 627, N, 'N');
     C.plaster(662, 912, N, 'N'); C.cove(662, 912, N + 0.018 * 18.33, 'N');
     C.slats(672, 760, N, 'N');
@@ -424,8 +424,8 @@ export function build() {
       const f = (i / 8) * Math.PI / 2;
       mesh(world, new THREE.BoxGeometry(0.008, hW, 0.01), P.taupeDark, ox + (Rw - 0.004) * Math.sin(f), hW / 2, oz + (Rw - 0.004) * Math.cos(f), 0, f, 0, false);
     }
-    for (const [a, b] of [[cy, 395], [440, 455]]) bx(434, a, 438, b, 0, hW, P.walnut, { collide: false });
-    for (let iy = 338; iy < 395; iy += 7) bx(433.7, iy, 434, iy + 0.4, 0, LH - 0.15, P.taupeDark, { collide: false, cast: false });
+    bx(434, cy, 438, 455, 0, hW, P.walnut, { collide: false });          // walnut cladding, full length (no door to the coworking)
+    for (let iy = 338; iy < 441; iy += 7) bx(433.7, iy, 434, iy + 0.4, 0, LH - 0.15, P.taupeDark, { collide: false, cast: false });
     bx(433.4, 446, 434, 447.5, 0, LH - 0.15, P.cove, { collide: false, cast: false });                  // vertical LED reveal (render)
     const sc = new THREE.Group(); mesh(sc, new THREE.SphereGeometry(0.2, 24, 12, 0, Math.PI), P.shade, 0, 0, 0); putI(sc, 433.6, 372, -Math.PI / 2, 2.3);   // alabaster half-dome sconce
   }
