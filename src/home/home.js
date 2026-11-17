@@ -23,8 +23,9 @@ buildPanes();
 let lastN = panes.children.length;
 addEventListener('resize', () => { const w = hero.clientWidth, n = w < 480 ? 5 : w < 1000 ? 7 : 9; if (n !== lastN) { lastN = n; buildPanes(); document.body.classList.contains('done') && panes.classList.add('settle'); } else placePanes(); });
 
-// the 360° video loads behind the hero while the logo animates. When both are done the hero slides up onto the
-// orbiting tower. Scrolling slides the text panel over it. (gl below now only gates the mini 3D plans.)
+// the 360° (tour.html?apt=terreo&embed=home – aerial view only, no interior) loads behind the hero while the logo
+// animates. When both are done the hero slides up and the building flies in from far away, then keeps orbiting.
+// Scrolling slides the text panel over it. No WebGL / load failure / 40 s timeout → the plain page (hero, then tours).
 const body = document.body, sceneEl = document.getElementById('scene'), frame = document.getElementById('three'), hint = document.getElementById('hint'), panel = document.getElementById('panel');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // 3D only on a real GPU: software WebGL (SwiftShader / llvmpipe: Lighthouse, Googlebot, PCs without a GPU driver),
@@ -37,34 +38,21 @@ const gl = (() => { try {
   if (navigator.connection?.saveData) return false;
   if ((navigator.deviceMemory && navigator.deviceMemory < 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 3)) return false;
   return true; } catch { return false; } })();
-// The 360° is a pre-rendered Ultra video (tools/herovid_tmp.mjs → public/home/hero-<wide|tall>.mp4): one full turn
-// around the tower, so playing it = the slow orbit and dragging scrubs it = turning by hand. Works on any phone (no
-// WebGL); Data Saver gets the still poster only.
-let introDone = false, ready3d = false, lifted = false, covered = false, held = false;
-// portrait screens (phones) get the tall render (1080×1920, the live hero's phone framing), the rest the wide one
-const HV = innerWidth < innerHeight * 0.8 ? 'hero-tall' : 'hero-wide';
-const ORBIT_RATE = 0.5;   // the video turns 360° in 40 s; half speed = the live hero's slow orbit
-body.classList.add('has3d');
-frame.poster = `home/${HV}.jpg`;
-// the page NEVER waits for the video: the hero lifts as soon as the logo intro ends; the poster shows until frames arrive
-ready3d = true; sceneEl.classList.add('ready');
-var fail = 0;
-if (!navigator.connection?.saveData) {
-  // the smallest file the device decodes in hardware: AV1 (recent phones / PCs) → HEVC (Apple) → H.264 720p (all)
-  const ok = async codecs => { if (!frame.canPlayType(`video/mp4; codecs="${codecs}"`)) return false;
-    try { const r = await navigator.mediaCapabilities.decodingInfo({ type: 'file', video: { contentType: `video/mp4; codecs="${codecs}"`, width: HV === 'hero-tall' ? 1080 : 1920, height: HV === 'hero-tall' ? 1920 : 1080, bitrate: 2e6, framerate: 24 } });
-      return r.supported && r.smooth && r.powerEfficient; } catch { return false; } };
-  const set = c => { frame.src = `home/${HV}-${c}.mp4`; frame.load(); sync(); };
-  // a file that fails to load falls back to H.264 (plays everywhere); if that fails too the poster simply stays
-  frame.addEventListener('error', () => { if (!frame.src.endsWith('-h264.mp4')) set('h264'); });
-  (async () => set(await ok('av01.0.08M.08') ? 'av1' : await ok('hvc1.1.6.L120.90') ? 'hevc' : 'h264'))().catch(() => set('h264'));
+let introDone = false, ready3d = false, lifted = false;
+if (gl) {
+  body.classList.add('has3d');
+  frame.src = 'tour.html?apt=terreo&embed=home';
+  addEventListener('message', e => {
+    if (e.origin !== location.origin || e.data !== 'platinum-3d-ready') return;
+    ready3d = true; sceneEl.classList.add('ready'); maybeLift();
+  });
+  var fail = setTimeout(() => { if (!ready3d) { body.classList.remove('has3d'); frame.removeAttribute('src'); } }, 40000);
 }
-const playing = () => lifted && !covered && !held && !document.hidden;
-const sync = () => { if (playing()) { frame.playbackRate = ORBIT_RATE; frame.play().catch(() => {}); } else frame.pause(); };
+const post = msg => frame.contentWindow && frame.contentWindow.postMessage(msg, location.origin);
 function maybeLift() {
   if (lifted || !introDone || !ready3d) return;
   lifted = true; clearTimeout(fail); scrollTo(0, 0);
-  body.classList.add('lift'); sync();
+  body.classList.add('lift'); post({ type: 'intro' });
   setTimeout(() => load(shots[0]), 3500);
   body.classList.remove('locked');
 }
@@ -426,7 +414,7 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
   }, { rootMargin: '900px 0px' }).observe(mini);
 }
 // scroll: hide the hint; stop rendering the 360° once the panel covers it completely (phones / old computers)
-let raf = 0;
+let raf = 0, covered = false;
 addEventListener('scroll', () => {
   if ((!lifted && body.classList.contains('has3d')) || raf) return;   // (with the 3D: only once the hero has lifted; without it: always)
   raf = requestAnimationFrame(() => {
@@ -434,44 +422,26 @@ addEventListener('scroll', () => {
     hint.classList.toggle('gone', scrollY > 24);
     openGap();
     const c = panel.getBoundingClientRect().top <= 1;
-    if (c !== covered) { covered = c; sync(); }
+    if (c !== covered) { covered = c; post({ type: 'pause', on: c }); }
   });
 }, { passive: true });
-// drag on the 360° → scrub the video (3.2 rad of orbit per screen width, like the live 3D had); let go with speed and
-// it glides on, then the slow orbit resumes. The video takes no pointer input itself, so the wheel and vertical
-// swipes keep scrolling the page; touch-action: pan-y leaves horizontal swipes for the rotation.
-{ const view = sceneEl.querySelector('.view'); let id = null, x = 0, t = 0, vel = 0, last = 0, want = null, seeking = false, resume = 0;
-  const wrap = s => ((s % frame.duration) + frame.duration) % frame.duration;
-  // one seek at a time: the newest target is applied when the previous seek lands (no queue of stale seeks)
-  const seek = s => { want = wrap(s); if (!seeking) { seeking = true; frame.currentTime = want; } };
-  frame.addEventListener('seeked', () => { if (want !== null && Math.abs(frame.currentTime - want) > 0.03) frame.currentTime = want; else { seeking = false; want = null; } });
-  const secPerPx = () => 3.2 / view.clientWidth / (2 * Math.PI) * frame.duration;
-  view.addEventListener('pointerdown', e => {
-    if (!lifted || !frame.duration || (e.pointerType === 'mouse' && e.button !== 0)) return;
-    id = e.pointerId; x = e.clientX; t = frame.currentTime; vel = 0; last = performance.now();
-    held = true; clearTimeout(resume); sync(); view.setPointerCapture(id); view.classList.add('drag');
-  });
+// drag on the 360° → rotate it (mouse: also tilt). The 3D frame itself takes no pointer input, so the wheel and
+// vertical swipes keep scrolling the page; touch-action: pan-y leaves horizontal swipes for the rotation.
+{ const view = sceneEl.querySelector('.view'); let id = null, x = 0, y = 0;
+  view.addEventListener('pointerdown', e => { if (!lifted || (e.pointerType === 'mouse' && e.button !== 0)) return; id = e.pointerId; x = e.clientX; y = e.clientY; view.setPointerCapture(id); view.classList.add('drag'); });
   view.addEventListener('pointermove', e => {
     if (e.pointerId !== id) return;
-    const now = performance.now(), step = (e.clientX - x) * secPerPx(); x = e.clientX;
-    if (!step) return;
-    vel = vel * 0.6 + step / Math.max(1, now - last) * 1000 * 0.4; last = now; t += step; seek(t); hint.classList.add('gone');
+    const k = 3.2 / view.clientWidth, dx = (e.clientX - x) * k, dy = e.pointerType === 'mouse' ? (e.clientY - y) * k * 0.6 : 0; x = e.clientX; y = e.clientY;
+    if (dx || dy) { post({ type: 'rotate', dx, dy }); hint.classList.add('gone'); }
   });
-  const end = e => {
-    if (e.pointerId !== id) return;
-    id = null; view.classList.remove('drag');
-    if (performance.now() - last > 80) vel = 0;
-    const glide = () => { if (id !== null) return; vel *= 0.92; t += vel / 60; if (Math.abs(vel) > 0.05) { seek(t); requestAnimationFrame(glide); }
-      else resume = setTimeout(() => { held = false; sync(); }, 1500); };
-    glide();
-  };
+  const end = e => { if (e.pointerId === id) { id = null; view.classList.remove('drag'); } };
   view.addEventListener('pointerup', end); view.addEventListener('pointercancel', end);
 }
 // the pill over the 360°: scrolls on to the white panel (a click, not a drag – it keeps its pointer from the rotation)
 { const b = document.getElementById('hintB'); b.addEventListener('pointerdown', e => e.stopPropagation());
   b.addEventListener('click', () => scrollTo({ top: panel.getBoundingClientRect().top + scrollY, behavior: reduced ? 'auto' : 'smooth' }));
   if (matchMedia('(hover: none)').matches) document.getElementById('hintD').textContent = 'Deslize para girar'; }
-document.addEventListener('visibilitychange', sync);
+document.addEventListener('visibilitychange', () => { if (lifted) post({ type: 'pause', on: document.hidden || covered }); });
 
 // intro finished (or skipped): panes switch to a slow float; scroll unlocks now (no 3D) or when the hero lifts
 const finish = () => {
@@ -481,6 +451,8 @@ const finish = () => {
 const timer = setTimeout(finish, 4600);
 document.getElementById('skip').addEventListener('click', () => { clearTimeout(timer); body.classList.add('instant'); finish(); });
 if (reduced) { clearTimeout(timer); finish(); }
+// the 3D failed while the visitor waits on the finished hero → unlock
+if (gl) setTimeout(() => { if (!lifted) { body.classList.remove('locked'); } }, 40100);
 
 // the info section: each block rises in once it enters the view, siblings staggered
 { const els = [...document.querySelectorAll('.ix [data-rv]')];
