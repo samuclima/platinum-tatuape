@@ -1063,26 +1063,13 @@ export function build() {
       g.computeVertexNormals(); return g; })();
     const LEAF = ['#3e6a2c', '#557f36', '#2f5424', '#6d9443'].map(c => std({ color: c, roughness: 0.9, bumpMap: pile, bumpScale: 3 }));
     const barkM = std({ color: '#5e4a3b', roughness: 1 }), bloomM = std({ color: '#e7c23d', roughness: 0.7 });
-    function premiumTree(ix, iy, s = 1, kind = 'shade') {
-      const g = new THREE.Group(), H0 = (kind === 'round' ? 2.0 : 3.0) * s, spread = (kind === 'round' ? 1.6 : 2.5) * s;
-      cylinder(g, 0.13 * s, 0.22 * s, H0, barkM, 0, 0, 0, 12);
-      const tips = [];
-      for (let i = 0; i < 4; i++) {                                           // main limbs splaying out from the trunk top
-        const a = i * 1.62 + s, r = spread * (0.45 + 0.15 * (i % 2)), top = new THREE.Vector3(Math.cos(a) * r, H0 + (kind === 'round' ? 1.0 : 1.6) * s, Math.sin(a) * r), base = new THREE.Vector3(0, H0 - 0.2, 0);
-        const L = top.distanceTo(base), lb = mesh(g, new THREE.CylinderGeometry(0.05 * s, 0.11 * s, L, 8), barkM, 0, 0, 0);
-        lb.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), top.clone().sub(base).normalize()); lb.position.copy(base).add(top).multiplyScalar(0.5); tips.push(top);
-      }
-      const n = kind === 'round' ? 26 : 40;
-      for (let i = 0; i < n; i++) {                                           // leaf clumps: dome over the limbs, darker underneath
-        const t = tips[i % tips.length], a = i * 2.39996, rr = spread * (0.2 + 0.55 * ((i * 37) % 10) / 10), y = t.y + (Math.random() - 0.3) * 0.9 * s;
-        const sc = (0.6 + Math.random() * 0.45) * s * (kind === 'round' ? 0.9 : 1.0);
-        const c = mesh(g, clumpGeo, LEAF[y > t.y ? (i % 2 ? 1 : 3) : (i % 2 ? 0 : 2)], Math.cos(a) * rr, y, Math.sin(a) * rr, 0, a, 0); c.scale.setScalar(sc); c.castShadow = true;
-        if (kind === 'ipe' && i % 3 === 0) { const f = mesh(g, clumpGeo, bloomM, Math.cos(a) * rr * 1.05, y + sc * 0.55, Math.sin(a) * rr * 1.05); f.scale.setScalar(sc * 0.45); }
-      }
-      putI(g, ix, iy, Math.random() * 6); const [x, z] = W(ix, iy); colliders.push({ x0: x - 0.3 * s, x1: x + 0.3 * s, z0: z - 0.3 * s, z1: z + 0.3 * s });
+    function premiumTree(ix, iy, s = 1, kind = 'shade') {                     // leafy pale-trunk tree (same style as the spa deck garden)
+      const h = { shade: 6.8, round: 4.8, ipe: 6.4 }[kind] * s;
+      putI(flowerTreeB(h, 0.8, kind === 'ipe' ? 'ipe' : 'green'), ix, iy, ix * 0.37 + iy);
+      const [x, z] = W(ix, iy); colliders.push({ x0: x - 0.3, x1: x + 0.3, z0: z - 0.3, z1: z + 0.3 });
     }
     for (const [a, b, s, k] of [[420, 188, 1.25, 'shade'], [494, 186, 1.15, 'shade'], [572, 183, 1.15, 'ipe'], [484, 243, 0.95, 'round'],
-      [212, 248, 1.25, 'shade'], [262, 292, 1.15, 'shade'], [425, 272, 0.85, 'round']]) premiumTree(a, b, s, k);
+      [212, 248, 1.25, 'shade'], [262, 292, 1.15, 'shade'], [432, 256, 0.85, 'round']]) premiumTree(a, b, s, k);
 
     // ---- walls ----
     bx(376, 145, 380, 218, 0, 2.2, travW); bx(375.8, 145, 380.2, 217.8, 2.2, 2.25, P.quartz, { collide: false });          // garden wall: forecourt | trees (plan line)
@@ -1096,7 +1083,10 @@ export function build() {
     // two large shade trees, then the garden with the red flower beds; walls only where the plan draws dark lines
     fl(270, 158, 364, 215, concreteTex, 2.0, 0.85, 0.007);
     fl(240, 215, 313, 300, grassTex, 3, 1, 0.005); fl(270, 145, 376, 158, grassTex, 3, 1, 0.005);
-    for (let i = 0; i < 46; i++) { const [x, z] = W(243 + Math.random() * 67, 218 + Math.random() * 80); const r = 0.3 + Math.random() * 0.35; const c = mesh(world, clumpGeo, LEAF[i % 4], x, r * 0.55, z); c.scale.set(r, r * (0.8 + Math.random() * 0.5), r); }
+    putI(leafHedgeB(17.6, 2.4, 0.8), 431, 152, -Math.PI / 2);   // tall leafy screen hides the north wall
+    putI(agapanthusRow(16.8, 0.5), 431, 159, -Math.PI / 2);
+    for (let ix = 392; ix < 586; ix += 15) putI(tropicalB(1.1 + (ix % 3) * 0.1), ix, 160, ix);
+    for (const [iy, h] of [[223, 1.5], [236, 1.1], [249, 1.6], [262, 1.2], [275, 1.5], [288, 1.0]]) putI(leafHedgeB(3.6, h, 0.9), 277 + (iy % 3) * 2, iy, -Math.PI / 2);   // dense shrub mass
 
     // ---- stepping-stone path (plan: grey strip from the coworking patio, then south along the deck wall) ----
     const stoneP = std({ color: '#b9b3a8', roughness: 0.85 });
@@ -1159,7 +1149,7 @@ export function build() {
     { const p = new THREE.Group(); lathe(p, [[0, 0], [0.26, 0], [0.3, 0.55], [0.28, 0.56], [0.25, 0.06], [0, 0.06]], std({ color: '#3a2f28', roughness: 0.5 }), 0, 0, 0, 32);
       putI(p, 352, 689); putI(tropicalB(1.0), 352, 689, 0.7, 0.5); solidI(346, 683, 358, 695); }
     // hedge along the north boundary wall behind the lounge: leafy shrub row instead of a clipped box
-    putI(leafHedgeB(17.6, 1.2, 0.8), 431, 152, -Math.PI / 2); solidI(272, 149, 591, 155);
+    solidI(272, 149, 591, 157);
     // ---- GARDEN BEYOND THE SPA DECK (casa de campo render): a deep layered bed along the north wall – a tall green
     // screen hiding the wall, slender pale-trunked ipê trees in yellow bloom, queen palms, big monsteras, grasses and
     // agapanthus at the front behind a low corten edge – the lawn stays as a strip in front of the deck; warm uplights.
@@ -1221,13 +1211,13 @@ export function build() {
       // slender shade trees over the lawn (render) + a dense hedge mass on the east edge and along the north wall
       for (const [a, b, s, k] of [[884, 182, 1.15, 'shade'], [932, 214, 1.0, 'shade'], [878, 262, 1.05, 'shade'], [930, 168, 0.8, 'round'], [905, 300, 0.75, 'round']]) premiumTree(a, b, s, k);
       // east edge: low clipped hedge with clipped boxwood spheres in front + ornamental grass tufts (premium, compact)
-      bx(962, 158, 969, 290, 0, 0.75, hedge); bx(962.3, 158.3, 968.7, 289.7, 0.75, 0.8, hedge, { collide: false });
+      putI(leafHedgeB(7.1, 1.3, 0.55), 965.5, 224, 0);                       // east hedge: leafy, not a box
       const grassT = std({ color: '#9fae6a', roughness: 0.9, side: THREE.DoubleSide });
       for (let iy = 166; iy < 288; iy += 11) { const [x, z] = W(957, iy); const r = 0.32 + ((iy / 11) % 2) * 0.06; const c = mesh(world, clumpGeo, LEAF[iy % 22 < 11 ? 1 : 0], x, r * 0.82, z); c.scale.setScalar(r);
         const [gx, gz] = W(956, iy + 5.5); for (let k = 0; k < 9; k++) { const bl = mesh(world, new THREE.ConeGeometry(0.02, 0.5 + Math.random() * 0.2, 3), grassT, gx + (Math.random() - 0.5) * 0.2, 0.28, gz + (Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.6, 0, (Math.random() - 0.5) * 0.6, false); } }
       for (let ix = 868; ix < 950; ix += 12) { const [x, z] = W(ix, 159); const r = 0.3 + ((ix / 12) % 2) * 0.05; const c = mesh(world, clumpGeo, LEAF[1], x, r * 0.82, z); c.scale.setScalar(r); }   // boxwood row along the north hedge
       solidI(952, 158, 970, 290);
-      bed(860, 142, 970, 155);
+      putI(leafHedgeB(6.0, 2.6, 0.8), 915, 152, -Math.PI / 2); solidI(860, 149, 970, 155);   // tall leafy screen on the north wall
       // dog toys on the grass: red rope bone, blue + green balls
       { const g = new THREE.Group(), red = std({ color: '#b3262e', roughness: 0.8 }); const rp = mesh(g, new THREE.CylinderGeometry(0.025, 0.025, 0.22, 10), red, 0, 0.03, 0); rp.rotation.z = Math.PI / 2;
         for (const sx of [-1, 1]) for (const sz of [-1, 1]) mesh(g, new THREE.SphereGeometry(0.035, 12, 8), red, sx * 0.12, 0.035, sz * 0.03); putI(g, 902, 240, 0.4); }
