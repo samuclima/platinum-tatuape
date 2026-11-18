@@ -1098,3 +1098,82 @@ export function slatLoungerB() {                              // teak slatted su
   for (const sx of [-1, 1]) rb(back, 0.04, 0.04, 0.82, teak, sx * 0.31, -0.03, -0.41, 0.008);
   return g;
 }
+
+// ---------------------------------------------------------------------------
+// GARDEN TREES with real foliage: instanced leaf cards (alpha sprays of small leaves) over a dark core,
+// so the canopy reads as leaves rather than smooth balls. kind 'ipe' sprinkles yellow blossom (ipê amarelo).
+// ---------------------------------------------------------------------------
+const sprayTex = (cols, n, rMin, rMax) => canvasTex(128, 128, (g, w, h) => {
+  g.clearRect(0, 0, w, h);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * 6.28, d = Math.random() * w * 0.36, x = w / 2 + Math.cos(a) * d, y = h / 2 + Math.sin(a) * d, r = rMin + Math.random() * (rMax - rMin);
+    g.save(); g.translate(x, y); g.rotate(Math.random() * 6.28); g.fillStyle = cols[i % cols.length];
+    g.beginPath(); g.ellipse(0, 0, r, r * 0.42, 0, 0, 6.29); g.fill(); g.restore();
+  }
+});
+K2.leafSpray = std({ map: sprayTex(['#3d6b2a', '#4f7f33', '#2f5a22', '#5f8f3c', '#46762f'], 46, 7, 13), alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.75, emissive: '#16220c', emissiveIntensity: 0.5 });
+K2.bloomSpray = std({ map: sprayTex(['#f2c335', '#e6b020', '#f7d75a', '#d99d1a'], 60, 3.5, 6.5), alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.7, emissive: '#5a3c00', emissiveIntensity: 0.35 });
+K2.canopyCore = std({ color: '#355c26', roughness: 1, emissive: '#101a08', emissiveIntensity: 0.5 });
+K2.paleBark = std({ map: canvasTex(64, 256, (g, w, h) => {
+  g.fillStyle = '#c4bcae'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 260; i++) { const t = Math.random(); g.fillStyle = t < 0.5 ? 'rgba(120,110,96,0.35)' : 'rgba(235,230,220,0.45)'; g.fillRect(Math.random() * w, Math.random() * h, 2 + Math.random() * 8, 1 + Math.random() * 2); }
+}), roughness: 0.95 });
+const CARD = new THREE.PlaneGeometry(0.62, 0.62), CORE = new THREE.IcosahedronGeometry(1, 2);
+export function flowerTreeB(h = 6.5, s = 1, kind = 'ipe') {   // slender pale trunk forking high, wide airy crown (casa de campo render)
+  const g = new THREE.Group(), bark = K2.paleBark;
+  const limb = (a, b, r0, r1) => { const L = a.distanceTo(b), m = mesh(g, new THREE.CylinderGeometry(r1, r0, L, 9), bark, 0, 0, 0);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); m.position.copy(a).add(b).multiplyScalar(0.5); m.castShadow = true; };
+  const lean = new THREE.Vector3((Math.random() - 0.5) * 0.35, 0, (Math.random() - 0.5) * 0.35);
+  const fork = new THREE.Vector3(0, h * 0.4, 0).add(lean);
+  limb(new THREE.Vector3(0, -0.05, 0), fork, 0.16 * s, 0.12 * s);
+  const R = h * 0.4 * s, crownY = h * 0.7, tips = [];
+  for (let i = 0; i < 4; i++) {                                   // limbs fork up and out, each splits once more
+    const a = i * 1.57 + Math.random() * 0.6, mid = fork.clone().add(new THREE.Vector3(Math.cos(a) * R * 0.45, h * 0.16, Math.sin(a) * R * 0.45));
+    limb(fork, mid, 0.1 * s, 0.065 * s);
+    for (const da of [-0.45, 0.45]) { const t = mid.clone().add(new THREE.Vector3(Math.cos(a + da) * R * 0.45, h * 0.1 + Math.random() * h * 0.08, Math.sin(a + da) * R * 0.45)); limb(mid, t, 0.06 * s, 0.03 * s); tips.push(t); }
+  }
+  // crown: a wide, slightly flat dome of clumps around the branch tips + a few filling the centre/top
+  const clumps = tips.map(t => [t.clone(), 0.95 + Math.random() * 0.35]);
+  for (let i = 0; i < 7; i++) { const a = i * 2.39996, d = R * (0.15 + 0.5 * Math.random()); clumps.push([new THREE.Vector3(Math.cos(a) * d + fork.x, crownY + h * 0.08 + Math.random() * h * 0.08, Math.sin(a) * d + fork.z), 0.85 + Math.random() * 0.3]); }
+  const leaves = [], blooms = [], m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), n = new THREE.Vector3(), up = new THREE.Vector3(0, 0, 1), p = new THREE.Vector3(), sc = new THREE.Vector3();
+  for (const [c, r0] of clumps) {
+    const r = r0 * s * h / 6.5;
+    const core = mesh(g, CORE, K2.canopyCore, c.x, c.y, c.z); core.scale.set(r * 0.55, r * 0.38, r * 0.55); core.castShadow = true;
+    for (let i = 0; i < 110; i++) {                               // cards on an ellipsoid shell, facing roughly outwards
+      n.set(Math.random() * 2 - 1, Math.random() * 1.6 - 0.6, Math.random() * 2 - 1).normalize();
+      p.set(c.x + n.x * r * (0.6 + Math.random() * 0.45), c.y + n.y * r * 0.62 * (0.6 + Math.random() * 0.45), c.z + n.z * r * (0.6 + Math.random() * 0.45));
+      q.setFromUnitVectors(up, n.clone().add(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)).normalize());
+      const k = 0.8 + Math.random() * 0.6; m4.compose(p, q, sc.set(k, k, k));
+      (kind === 'ipe' && n.y > -0.25 && Math.random() < 0.5 ? blooms : leaves).push(m4.clone());
+    }
+  }
+  for (const [list, mat] of [[leaves, K2.leafSpray], [blooms, K2.bloomSpray]]) {
+    if (!list.length) continue;
+    const im = new THREE.InstancedMesh(CARD, mat, list.length); list.forEach((m, i) => im.setMatrixAt(i, m)); im.castShadow = true; im.receiveShadow = true; g.add(im);
+  }
+  return g;
+}
+export function grassClumpB(h = 0.7, n = 26, mat = std({ color: '#9aa06a', roughness: 0.9, side: THREE.DoubleSide })) {   // ornamental grass fountain
+  const g = new THREE.Group(), geo = new THREE.PlaneGeometry(0.025, 1, 1, 4);
+  { const pp = geo.attributes.position; for (let i = 0; i < pp.count; i++) { const v = pp.getY(i) + 0.5; pp.setY(i, v); pp.setZ(i, v * v * 0.35); } geo.computeVertexNormals(); }
+  const im = new THREE.InstancedMesh(geo, mat, n), m4 = new THREE.Matrix4(), e = new THREE.Euler(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), ps = new THREE.Vector3();
+  for (let i = 0; i < n; i++) { e.set(-0.15 - Math.random() * 0.25, Math.random() * 6.28, 0, 'YXZ'); q.setFromEuler(e); m4.compose(ps.set((Math.random() - 0.5) * 0.1, 0, (Math.random() - 0.5) * 0.1), q, sc.set(1, h * (0.7 + Math.random() * 0.5), h * 0.7)); im.setMatrixAt(i, m4); }
+  g.add(im); return g;
+}
+export function leafHedgeB(len, h = 2.4, depth = 0.9) {   // informal planted screen: a soft green mass dressed in leaf cards (no clipped boxes, no balls)
+  const g = new THREE.Group(), list = [], m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), n = new THREE.Vector3(), p = new THREE.Vector3(), sc = new THREE.Vector3(), up = new THREE.Vector3(0, 0, 1);
+  const nb = Math.max(2, Math.round(len / 0.9));
+  for (let b = 0; b < nb; b++) {                                  // overlapping soft masses of varying height
+    const cx = -len / 2 + (b + 0.5) * len / nb, hb = h * (0.75 + Math.random() * 0.35), rx = len / nb * 0.85, rz = depth / 2;
+    const core = mesh(g, CORE, K2.canopyCore, cx, hb * 0.5, 0); core.scale.set(rx * 0.85, hb * 0.5, rz * 0.8); core.castShadow = true;
+    for (let i = 0; i < 90; i++) {
+      n.set(Math.random() * 2 - 1, Math.random() * 1.4 - 0.4, Math.random() * 2 - 1).normalize();
+      p.set(cx + n.x * rx * (0.8 + Math.random() * 0.3), hb * 0.5 + n.y * hb * 0.5 * (0.8 + Math.random() * 0.3), n.z * rz * (0.85 + Math.random() * 0.3));
+      if (p.y < 0.05) continue;
+      q.setFromUnitVectors(up, n.clone().add(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)).normalize());
+      const k = 0.6 + Math.random() * 0.5; m4.compose(p, q, sc.set(k, k, k)); list.push(m4.clone());
+    }
+  }
+  const im = new THREE.InstancedMesh(CARD, K2.leafSpray, list.length); list.forEach((m, i) => im.setMatrixAt(i, m)); im.castShadow = im.receiveShadow = true; g.add(im);
+  return g;
+}

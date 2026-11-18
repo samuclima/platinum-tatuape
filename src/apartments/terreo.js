@@ -14,7 +14,7 @@ import {
   sofaB, std, tableB, toiletB, upperCabB, vanity2B, wall, woodClad, world, worldRb, canvasTex, sanca, addLight, pothos, marble, fabric, books, phys, pile,
 } from '../engine/core.js';
 import { PK, laptopB, bigPotTree, builtGrillB, diningChairB, discPendantLine, drapeB, kitchenWallB, lSofaB, ovalStoneTableB, uplitPlant } from './premiumKit.js';
-import { tropicalB, queenPalmB } from './pav2Kit.js';
+import { tropicalB, queenPalmB, flowerTreeB, grassClumpB, bushRow, agapanthusRow, leafHedgeB } from './pav2Kit.js';
 import { CAR_HALF, premiumCarB } from './carKit.js';
 import { makeCorridor } from './corridorKit.js';
 import { barStoolB, boucleArmchairB, boucleTubChairB, conePendant, curvedLoungeSofaB, curvedSofaB, ficusTreeB, monsteraPotB, arcLampB, hoodCyl, islandB, organicTableB } from './pav2Kit.js';
@@ -1047,7 +1047,6 @@ export function build() {
     // warm wash on the deck (no bollards)
     for (const [a, b] of [[640, 315], [745, 240], [615, 285]]) { const l = addLight(new THREE.PointLight('#ffc98a', 1.2, 5, 2)); const [x, z] = W(a, b); l.position.set(x, 0.7, z); world.add(l); }
   }
-  tree(790, 200, 1.1); tree(835, 285, 0.9);
 
   // ---------------------------------------------------------------------------
   // LOUNGE EXTERNO (08) – traced from the plan: lawn with a stepping-stone path, a paved forecourt in the
@@ -1083,7 +1082,7 @@ export function build() {
       putI(g, ix, iy, Math.random() * 6); const [x, z] = W(ix, iy); colliders.push({ x0: x - 0.3 * s, x1: x + 0.3 * s, z0: z - 0.3 * s, z1: z + 0.3 * s });
     }
     for (const [a, b, s, k] of [[420, 188, 1.25, 'shade'], [494, 186, 1.15, 'shade'], [572, 183, 1.15, 'ipe'], [484, 243, 0.95, 'round'],
-      [212, 248, 1.25, 'shade'], [262, 292, 1.15, 'shade'], [425, 272, 0.85, 'round'], [700, 170, 1.15, 'shade'], [612, 196, 0.8, 'round']]) premiumTree(a, b, s, k);
+      [212, 248, 1.25, 'shade'], [262, 292, 1.15, 'shade'], [425, 272, 0.85, 'round']]) premiumTree(a, b, s, k);
 
     // ---- walls ----
     bx(376, 145, 380, 218, 0, 2.2, travW); bx(375.8, 145, 380.2, 217.8, 2.2, 2.25, P.quartz, { collide: false });          // garden wall: forecourt | trees (plan line)
@@ -1159,7 +1158,33 @@ export function build() {
     // service corridor (marked): a tall tropical in a stone pot next to the delivery room
     { const p = new THREE.Group(); lathe(p, [[0, 0], [0.26, 0], [0.3, 0.55], [0.28, 0.56], [0.25, 0.06], [0, 0.06]], std({ color: '#3a2f28', roughness: 0.5 }), 0, 0, 0, 32);
       putI(p, 352, 689); putI(tropicalB(1.0), 352, 689, 0.7, 0.5); solidI(346, 683, 358, 695); }
-    bed(272, 142, 860, 155);                                                    // hedge along the north boundary wall (lounge + beyond the spa deck)
+    // hedge along the north boundary wall behind the lounge: leafy shrub row instead of a clipped box
+    putI(leafHedgeB(17.6, 1.2, 0.8), 431, 152, -Math.PI / 2); solidI(272, 149, 591, 155);
+    // ---- GARDEN BEYOND THE SPA DECK (casa de campo render): a deep layered bed along the north wall – a tall green
+    // screen hiding the wall, slender pale-trunked ipê trees in yellow bloom, queen palms, big monsteras, grasses and
+    // agapanthus at the front behind a low corten edge – the lawn stays as a strip in front of the deck; warm uplights.
+    {
+      const grassM2 = std({ color: '#7f8a55', roughness: 0.9, side: THREE.DoubleSide });
+      const B0 = 149, B1 = 186, A0 = 591, A1 = 860;                            // bed ix 591–860 × iy 149–186 (≈ 2 m deep)
+      bx(A0, B0, A1, B1, 0, 0.05, P.soil, { collide: false, cast: false });
+      bx(A0, B1 - 0.4, A1, B1, 0, 0.12, std({ color: '#5a3424', roughness: 0.6, metalness: 0.3 }), { collide: false });   // corten edge
+      solidI(A0, B0, A1, B1 - 6);
+      putI(leafHedgeB(14.6, 3.0, 1.0), (A0 + A1) / 2, 155, -Math.PI / 2, 0.04);   // tall screen against the wall
+      putI(leafHedgeB(14.4, 1.0, 0.8), (A0 + A1) / 2, 166, -Math.PI / 2, 0.04);    // middle layer
+      putI(agapanthusRow(14.2, 0.55), (A0 + A1) / 2, 181, -Math.PI / 2, 0.04);    // front edge
+      for (const [ix, iy, h, k] of [[648, 172, 6.4, 'ipe'], [742, 168, 5.8, 'ipe'], [836, 172, 5.4, 'green']]) {
+        putI(flowerTreeB(h, 1, k), ix, iy, ix * 0.37); solidI(ix - 3, iy - 3, ix + 3, iy + 3);
+        const l = addLight(new THREE.SpotLight('#ffcf8f', 3.2, h + 1, 0.5, 0.7, 1.6)), [x, z] = W(ix, iy + 6);   // ground uplight on the trunk
+        l.position.set(x, 0.15, z); const [tx, tz] = W(ix, iy); l.target.position.set(tx, h * 0.75, tz); world.add(l, l.target);
+        mesh(world, new THREE.CircleGeometry(0.06, 16), P.led, x, 0.06, z, -Math.PI / 2, 0, 0, false);
+      }
+      for (const [ix, iy, h] of [[612, 166, 5.8], [700, 160, 6.6], [792, 158, 5.6]]) putI(queenPalmB(h, 0.85), ix, iy, ix + iy, 0.04);
+      for (const [ix, iy, s] of [[625, 176, 1.25], [672, 174, 1.4], [718, 177, 1.2], [766, 175, 1.35], [812, 177, 1.2], [850, 170, 1.1]]) putI(tropicalB(s), ix, iy, ix * 0.7, 0.04);
+      for (let ix = 600; ix < 856; ix += 13) putI(grassClumpB(0.55 + (ix % 3) * 0.08, 22, grassM2), ix + (ix % 5), 183, ix, 0.04);
+    }
+    // east garden strip (beside the garden lounge): one more slender green tree + a palm in place of the old ball trees
+    putI(flowerTreeB(5.2, 1, 'green'), 835, 285, 1.3); solidI(832, 282, 838, 288);
+    putI(queenPalmB(5.2, 0.8), 842, 215, 2.1);
 
     // ---- PET PLACE (12) – render: soft lawn under slender shade trees, a dense hedge mass behind, a black bar fence
     // with white flowers separating the paved patio in front of the pet care glass door (gate open), pots by the door,
