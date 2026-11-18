@@ -53,32 +53,30 @@ function maybeLift() {
   if (lifted || !introDone || !ready3d) return;
   lifted = true; clearTimeout(fail); scrollTo(0, 0);
   body.classList.add('lift'); post({ type: 'intro' });
-  setTimeout(() => load(shots[0]), 3500);
+  setTimeout(() => load(vid), 3500);
   body.classList.remove('locked');
 }
 // the white panel: the two words rise when it is well into view; the renders are fetched only after the hero lifts
 // (first one early, the rest when the panel shows up) so they never compete with the 3D download
 const MINI_YAW = new URLSearchParams(location.search).has('yaw') ? +new URLSearchParams(location.search).get('yaw') : -1.5708;
-const feel = document.getElementById('feel'), shots = [...document.querySelectorAll('#frame img')], capName = document.getElementById('capName');
+const feel = document.getElementById('feel'), vid = document.getElementById('feelVid');
 const load = im => { if (im.dataset.src) { im.src = im.dataset.src; delete im.dataset.src; } };
 new IntersectionObserver(es => { for (const e of es) panel.classList.toggle('show', e.isIntersecting); }, { rootMargin: '0px 0px -38% 0px' }).observe(panel);
-new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { o.disconnect(); panel.querySelectorAll('img[data-src]').forEach(load); } }).observe(panel);
+new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { o.disconnect(); panel.querySelectorAll('img[data-src]').forEach(load); load(vid); } }).observe(panel);
 { const o = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); o.unobserve(e.target); } }, { rootMargin: '0px 0px -12% 0px' });
   panel.querySelectorAll('.rv').forEach(el => o.observe(el)); }
-// the gap between the words follows the scroll (0 → 1 over the first 55 % of the pinned stretch); while it is open
-// the renders cross-fade every few seconds
-let gapP = 0, shot = 0;
+// the gap between the words follows the scroll (0 → 1 over the first 55 % of the pinned stretch); the video inside it
+// plays on its own (muted, looped, no controls) while the white panel is on screen, and pauses when it leaves
+let gapP = 0;
 function openGap() {
   const r = feel.getBoundingClientRect(), t = Math.min(1, Math.max(0, -r.top / ((r.height - innerHeight) * 0.55)));
   const p = t * t * (3 - 2 * t);
   if (p !== gapP) { gapP = p; feel.style.setProperty('--p', p.toFixed(4)); }
   feel.classList.toggle('leaving', r.bottom < innerHeight * 1.25);   // the caption goes before the next screen arrives
+  const want = !reduced && p > 0.02 && r.bottom > 0 && r.top < innerHeight && !document.hidden;   // only while the gap is open on screen
+  if (want && vid.paused) { load(vid); vid.play().catch(() => {}); } else if (!want && !vid.paused) vid.pause();
 }
-setInterval(() => {
-  if (gapP < 0.2 || document.hidden || feel.getBoundingClientRect().bottom < 0) return;
-  const next = shots[(shot + 1) % shots.length]; if (!next.complete || !next.naturalWidth) return;
-  shots[shot].classList.remove('on'); shot = (shot + 1) % shots.length; next.classList.add('on'); capName.textContent = next.dataset.cap;
-}, 2800);
+document.addEventListener('visibilitychange', openGap);
 addEventListener('resize', openGap);
 document.getElementById('feelGo').addEventListener('click', () => {   // picture still closed → open it; open → on to the levels
   const r = feel.getBoundingClientRect(), top = r.top + scrollY;
