@@ -742,25 +742,88 @@ export function curvedSofaB(R = 2.2, arc = 1.3, mat = fabric('#b8693f', 1.6)) { 
 // ---------------------------------------------------------------------------
 // LOBBY C/ PÉ-DIREITO DUPLO (térreo render): true curved sofa, bouclé tub armchairs, ficus trees + monstera in tall pots
 // ---------------------------------------------------------------------------
-function arcSlab(r0, r1, a0, a1, h, bevel = 0.05) {     // annular sector extruded upward (y 0 … h), rounded edges
-  const sh = new THREE.Shape();
-  sh.absarc(0, 0, r1, a0, a1, false); sh.absarc(0, 0, r0, a1, a0, true); sh.closePath();
-  const g = new THREE.ExtrudeGeometry(sh, { depth: Math.max(0.01, h - 2 * bevel), bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 5, curveSegments: 64 });
-  g.rotateX(-Math.PI / 2); g.translate(0, bevel, 0); g.computeVertexNormals();
-  return g;
-}
-export function curvedLoungeSofaB(R = 1.9, arc = 1.7, mat = phys({ color: '#b5703f', roughness: 0.62, sheen: 0.4, sheenColor: '#e0a070' })) {
-  // one continuous curved sofa (render: caramel, low, soft rounded edges), concave side (+z) faces its centre at (0, 0, R)
-  const g = new THREE.Group(), a0 = Math.PI / 2 - arc / 2, a1 = Math.PI / 2 + arc / 2;
-  const add = (geo, m, y = 0) => { const o = new THREE.Mesh(geo, m); o.position.set(0, y, R); o.castShadow = o.receiveShadow = true; g.add(o); return o; };
-  add(arcSlab(R - 0.36, R + 0.36, a0 + 0.03, a1 - 0.03, 0.08, 0.02), std({ color: '#3b2a1e', roughness: 0.6 }));       // recessed plinth
-  add(arcSlab(R - 0.46, R + 0.42, a0, a1, 0.34, 0.08), mat, 0.06);                                                       // seat base
-  add(arcSlab(R - 0.44, R + 0.16, a0 + 0.04, a1 - 0.04, 0.16, 0.07), mat, 0.38);                                          // seat cushion
-  add(arcSlab(R + 0.14, R + 0.44, a0, a1, 0.42, 0.13), mat, 0.36);                                                        // curved back
-  for (const a of [a0 + 0.06, a1 - 0.06]) {                                                                              // rounded arm ends, lying radially
-    const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.15, 0.58, 8, 20), mat), dir = new THREE.Vector3(Math.cos(a), 0, -Math.sin(a));
-    arm.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir); arm.position.set(R * Math.cos(a), 0.5, R - R * Math.sin(a)); arm.castShadow = true; g.add(arm);
+// Upholstered piece swept along an arc (centre (0, 0, R), angle a: point (r cos a, y, R − r sin a)): a rounded-rect
+// cross-section r0…r1 × y0…y1 (corner radius c) with rounded-box ends, a crowned top and a bulging front, so it reads as
+// a soft, filled cushion instead of a bevelled slab. Smooth normals, UVs in metres (fabric weave scale).
+function puffArc(R, a0, a1, r0, r1, y0, y1, c, { crown = 0, bulge = 0, nu = 72, nv = 72, nc = 7 } = {}) {
+  const rm = (r0 + r1) / 2, ym = (y0 + y1) / 2, hr = (r1 - r0) / 2, hy = (y1 - y0) / 2;
+  const ca = c / rm, b0 = a0 + ca, b1 = a1 - ca;                    // straight run between the two rounded ends
+  // rounded-rect point at perimeter fraction t (starts bottom-centre, counter-clockwise in (r, y)), half sizes w, h, corner k
+  const rr = (t, w, h, k) => {
+    const sw = 2 * (w - k), sh = 2 * (h - k), q = Math.PI * k / 2, L = 2 * sw + 2 * sh + 4 * q;
+    let s = t * L;
+    const seg = [[sw / 2, (u) => [u, -h]], [q, (u) => { const f = -Math.PI / 2 + u / q * Math.PI / 2; return [w - k + k * Math.cos(f), -h + k + k * Math.sin(f)]; }],
+      [sh, (u) => [w, -h + k + u]], [q, (u) => { const f = u / q * Math.PI / 2; return [w - k + k * Math.cos(f), h - k + k * Math.sin(f)]; }],
+      [sw, (u) => [w - k - u, h]], [q, (u) => { const f = Math.PI / 2 + u / q * Math.PI / 2; return [-w + k + k * Math.cos(f), h - k + k * Math.sin(f)]; }],
+      [sh, (u) => [-w, h - k - u]], [q, (u) => { const f = Math.PI + u / q * Math.PI / 2; return [-w + k + k * Math.cos(f), -h + k + k * Math.sin(f)]; }],
+      [sw / 2, (u) => [-w + k + u, -h]]];
+    for (const [len, fn] of seg) { if (s <= len + 1e-9) return [...fn(Math.max(0, s)), t * L]; s -= len; }
+    return [0, -h, L];
+  };
+  // rings: nc cap rings, nu body rings, nc cap rings – each [angle, inset]
+  const rings = [];
+  for (let i = nc; i >= 1; i--) { const e = c * i / nc; rings.push([b0 - e / rm, c - Math.sqrt(Math.max(0, c * c - e * e))]); }
+  for (let i = 0; i <= nu; i++) rings.push([b0 + (b1 - b0) * i / nu, 0]);
+  for (let i = 1; i <= nc; i++) { const e = c * i / nc; rings.push([b1 + e / rm, c - Math.sqrt(Math.max(0, c * c - e * e))]); }
+  const pos = [], uv = [], idx = [];
+  for (const [a, d] of rings) {
+    const ua = Math.min(1, Math.abs((a - (a0 + a1) / 2) / ((a1 - a0) / 2))), fa = 1 - ua * ua;
+    for (let j = 0; j < nv; j++) {
+      let [pr, py, sv] = rr(j / nv, hr - d, hy - d, Math.max(0.002, c - d));
+      const nr = pr / hr, ny = py / hy;
+      if (crown && ny > 0) py += crown * fa * (1 - nr * nr) * ny;                 // domed top
+      if (bulge && nr < 0) pr -= bulge * fa * (1 - ny * ny) * -nr;                // filled, rounded front face
+      const r = rm + pr, y = ym + py;
+      pos.push(r * Math.cos(a), y, R - r * Math.sin(a)); uv.push(a * rm * 1.6, sv * 1.6);
+    }
   }
+  const n = rings.length;
+  for (let i = 0; i < n - 1; i++) for (let j = 0; j < nv; j++) {
+    const A = i * nv + j, B = i * nv + (j + 1) % nv, C = (i + 1) * nv + j, D = (i + 1) * nv + (j + 1) % nv;
+    idx.push(A, C, B, B, C, D);
+  }
+  for (const [ri, flip] of [[0, true], [n - 1, false]]) {                         // close the flat centre of each end
+    const ci = pos.length / 3, a = rings[ri][0];
+    pos.push(rm * Math.cos(a), ym, R - rm * Math.sin(a)); uv.push(0, 0);
+    for (let j = 0; j < nv; j++) { const A = ri * nv + j, B = ri * nv + (j + 1) % nv; flip ? idx.push(ci, A, B) : idx.push(ci, B, A); }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geo.setIndex(idx); geo.computeVertexNormals();
+  return geo;
+}
+// loose square throw pillow: thick filled centre, thin pinched seams, corners slightly pointed (w × h, thickness t)
+function pillowGeo(w = 0.46, h = 0.46, t = 0.16) {
+  const geo = new THREE.SphereGeometry(1, 40, 28), p = geo.attributes.position, v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i);
+    const sx = Math.sign(v.x) * Math.abs(v.x) ** 0.5, sy = Math.sign(v.y) * Math.abs(v.y) ** 0.5, m = Math.max(Math.abs(sx), Math.abs(sy));
+    p.setXYZ(i, sx * w / 2, sy * h / 2, v.z * t / 2 * (1 - 0.9 * m ** 2.2));
+  }
+  geo.computeVertexNormals(); return geo;
+}
+export function curvedLoungeSofaB(R = 1.9, arc = 1.7, mat = phys({ color: '#b2683b', roughness: 0.78, sheen: 0.7, sheenRoughness: 0.45, sheenColor: '#f0b080', bumpMap: P.sofa.bumpMap, bumpScale: 0.5 })) {
+  // one continuous curved sofa (lobby render: cognac, low, plump): recessed dark plinth, soft base, three crowned seat
+  // cushions, one rolled back running the whole curve with rounded ends, loose throw pillows. Concave side (+z) faces (0, 0, R).
+  const g = new THREE.Group(), a0 = Math.PI / 2 - arc / 2, a1 = Math.PI / 2 + arc / 2;
+  const add = (geo, m) => { const o = new THREE.Mesh(geo, m); o.castShadow = o.receiveShadow = true; g.add(o); return o; };
+  const inA = m => m / R;                                                         // metres along the seat → angle
+  add(puffArc(R, a0 + inA(0.1), a1 - inA(0.1), R - 0.34, R + 0.32, 0, 0.075, 0.012, { nv: 32 }), std({ color: '#2e231b', roughness: 0.7 }));   // recessed plinth – the sofa floats
+  add(puffArc(R, a0, a1, R - 0.46, R + 0.44, 0.06, 0.33, 0.085, { bulge: 0.012 }), mat);                                                     // upholstered base
+  add(puffArc(R, a0, a1, R + 0.1, R + 0.46, 0.26, 0.8, 0.16, { bulge: 0.035, crown: 0.012 }), mat);                                          // rolled back, rounded ends
+  const s0 = a0 + inA(0.07), s1 = a1 - inA(0.07), gap = inA(0.012), nS = 3, sw = (s1 - s0) / nS;
+  for (let i = 0; i < nS; i++)                                                                                                                // seat cushions, small gaps
+    add(puffArc(R, s0 + i * sw + gap / 2, s0 + (i + 1) * sw - gap / 2, R - 0.45, R + 0.16, 0.31, 0.47, 0.065, { crown: 0.03, bulge: 0.025, nu: 36 }), mat);
+  // throw pillows leaning on the back (render: cream bouclé + a rust velvet accent)
+  const pil = (ang, m, w, h, lean, twist) => {
+    const o = add(pillowGeo(w, h, 0.17), m), r = R + 0.06;
+    o.position.set(r * Math.cos(ang), 0.47 + h / 2 - 0.02, R - r * Math.sin(ang));
+    o.rotation.set(-lean, Math.atan2(-Math.cos(ang), Math.sin(ang)), twist, 'YXZ');
+  };
+  const cream = fabric('#eadfcb', 2.4), rust = velvet('#8f3f26', '#d98a62');
+  pil(a0 + inA(0.55), cream, 0.5, 0.5, 0.3, 0.06);
+  pil(a0 + inA(0.95), rust, 0.42, 0.34, 0.24, -0.05);
+  pil(a1 - inA(0.55), cream, 0.5, 0.5, 0.3, -0.07);
   return g;
 }
 export function boucleTubChairB(mat = fabric('#e8e1d4', 2.6), wood = K2.darkWood) {
