@@ -11,7 +11,9 @@
     "compare": "node tools/compare.mjs"
   },
   "dependencies": {
-    "three": "0.187.0"
+    "three": "0.187.0",
+    "three-gpu-pathtracer": "^0.0.28",
+    "three-mesh-bvh": "^0.9.18"
   },
   "devDependencies": {
     "acorn": "^8.15.0",

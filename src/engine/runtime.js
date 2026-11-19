@@ -52,7 +52,7 @@ export function start(meta) {
   // daylight bouncing in through the windows (soft area lights): centre, size, height, inward normal
   for (const [cx, cz, w, h, y, nx, nz, inten] of meta.windows) {
     const l = new THREE.RectAreaLight('#e6eeff', inten, w, h);
-    l.position.set(X(cx) + nx * 0.03, y, Z(cz) + nz * 0.03); l.lookAt(X(cx) + nx * 3, y - 0.3, Z(cz) + nz * 3);
+    l.position.set(X(cx) + nx * 0.03, y, Z(cz) + nz * 0.03); l.lookAt(X(cx) + nx * 3, y - 0.3, Z(cz) + nz * 3); l.userData.win = true;   // fake daylight bounce (pathtrace.js drops it)
     world.add(l);
   }
 
@@ -1050,6 +1050,13 @@ export function start(meta) {
     THREE, camera, setScale, setFov, colliders, planLines, blocked, X, Z, gtao, bloom, ssr, grade, topCam,
     ultra() { autoOn = false; autoLevel = 0; quality = true; embedMode = false; setUltra(true); },   // tools/bake_pano.mjs: Ultra without the toast (tools/herovid_tmp.mjs: also on the home hero, which otherwise renders direct)
     high() { autoOn = false; autoLevel = 0; quality = true; setUltra(false); },   // tools/bake_visit.mjs: High, no automatic downgrade
+    async pathtracer(opts) {                                     // tools/bake_pt.mjs: path-traced photos (render-farm look); the live loop stops
+      paused = true; quality = false;
+      const { makePathTracer } = await import('./pathtrace.js');
+      return makePathTracer({ renderer, scene, camera, sky, world, downlights, ceilingY: H, spotSlots, rectSlots,
+        rectDefs: rectDefs.filter(d => !d.win), fakeLights: scene.children.filter(o => o.isHemisphereLight),
+        hideList: [labelGroup, avatar], levelG }, opts);
+    },
     orbit, renderer, composer, scene, labelGroup, levelG, ceilingGroup,
     rooms: meta.rooms, eye: EYE,                                // (tools/bake_pano.mjs: one 360° panorama per room)
     tp(px, pz, yaw = 0, pitch = 0) {
@@ -1104,7 +1111,7 @@ export function start(meta) {
     for (const l of found) {
       const m = new THREE.Matrix4().multiplyMatrices(inv, l.matrixWorld), pos = new THREE.Vector3(), q = new THREE.Quaternion(), sc = new THREE.Vector3();
       m.decompose(pos, q, sc);
-      rectDefs.push({ pos, q, w: l.width, h: l.height, intensity: l.intensity, color: l.color.clone() });
+      rectDefs.push({ pos, q, w: l.width, h: l.height, intensity: l.intensity, color: l.color.clone(), win: !!l.userData.win });
       const i = roomLights.indexOf(l); if (i >= 0) roomLights.splice(i, 1);
       l.parent.remove(l);
     }
