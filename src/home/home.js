@@ -352,7 +352,7 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
     };
     const loadPano = (w, card, full, alt) => {
       const id = alt ? card.dataset.panoAlt : card.dataset.pano || card.dataset.apt, std = `home/pano/${id}/`;
-      const bases = !full && Math.max(innerWidth, innerHeight) * devicePixelRatio > 1300 ? [`${std}hd/`, std] : [std];
+      const bases = [std];                                              // hd/ (1536 px) still holds the pre-path-traced renders: skip it until it is re-baked
       const tryBase = k => import(new URL('home/pano.js', document.baseURI).href)
         .then(mod => mod.pano(w.querySelector('.pv-host'), { base: bases[k], onReady: () => { w.classList.add('ready'); setTimeout(() => w.classList.add('used'), 6500); } }))
         .catch(err => { if (k + 1 < bases.length) return tryBase(k + 1); throw err; });
