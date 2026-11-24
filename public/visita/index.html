@@ -127,6 +127,8 @@
     .plan svg { height: 120px; }
   }
   @media (prefers-reduced-motion: reduce) { .card, .lift, .load { transition: none; } .lift .ar { animation: none; } }
+  /* ?embed=1: opened in the home page's modal – the parent page closes it; "Voltar" becomes a close button */
+  .emb .bar .chip .ttl { display: none; }
 </style>
 </head>
 <body>
@@ -206,6 +208,15 @@
   $('fs').addEventListener('click', () => document.fullscreenElement ? document.exitFullscreen() : doc.requestFullscreen?.());
   addEventListener('keydown', e => { if (!v || e.target.closest?.('input,textarea')) return;
     if (e.key === 'ArrowRight' || e.key === 'PageDown') v.goStop(v.stop + 1); if (e.key === 'ArrowLeft' || e.key === 'PageUp') v.goStop(v.stop - 1); });
+  // inside the home page's modal (?embed=1): "Voltar" / Esc close the modal, "Fale conosco" closes it and goes to the contact
+  if (new URLSearchParams(location.search).has('embed') && parent !== window) {
+    doc.classList.add('emb');
+    const tell = type => parent.postMessage({ visita: type }, location.origin);
+    const back = document.querySelector('.bar .chip'); back.textContent = '× Fechar'; back.setAttribute('aria-label', 'Fechar a visita');
+    back.addEventListener('click', e => { e.preventDefault(); tell('close'); });
+    document.querySelector('.talk').addEventListener('click', e => { e.preventDefault(); tell('talk'); });
+    addEventListener('keydown', e => { if (e.key === 'Escape' && !document.fullscreenElement) tell('close'); });
+  }
   if (matchMedia('(max-width: 700px)').matches) { $('card').classList.add('min'); $('cMin').textContent = '+'; }   // phones: the view first, the text a tap away
   visita($('host'), { base: 'pano/', ui, start: decodeURIComponent(location.hash.slice(1)) || null, onReady: () => { doc.classList.add('ready'); setTimeout(() => doc.classList.add('used'), 7000); } })
     .then(x => { v = x; data = x.data; fill(x.stop); })

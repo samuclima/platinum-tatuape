@@ -319,6 +319,52 @@ document.getElementById('feelGo').addEventListener('click', () => {   // picture
     a.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; at(e); if (!hov) { tx = mx; ty = my; hov = true; a.classList.add('hov'); } });
     a.addEventListener('pointerleave', () => { hov = false; a.classList.remove('hov'); }); }
   }
+  // the building visit (visita/) opens in a modal over the home page – an iframe of the visit page in ?embed=1 mode, growing
+  // out of the lobby panel (full screen on phones). The visit asks to close (× / Esc) or to go to the contact via postMessage;
+  // the phone's back button closes it too. Plain links elsewhere (plan pages, 404) still open visita/ as its own page.
+  { const R = 22, phone = matchMedia('(hover: none), (max-width: 860px)');
+    let modal = null, from = null;
+    const clipFrom = (el, box) => { const a = el.getBoundingClientRect(), b = box.getBoundingClientRect();
+      return `inset(${Math.max(0, a.top - b.top)}px ${Math.max(0, b.right - a.right)}px ${Math.max(0, b.bottom - a.bottom)}px ${Math.max(0, a.left - b.left)}px round ${R}px)`; };
+    const close = (pop = false) => {
+      if (!modal) return;
+      const m = modal, box = m.firstElementChild, el = from; modal = from = null;
+      if (!pop && history.state?.visita) history.back();
+      document.documentElement.classList.remove('walking'); m.classList.add('closing');
+      const a = el.getBoundingClientRect(), shrink = !m.classList.contains('full') && a.bottom > 0 && a.top < innerHeight;
+      if (shrink) box.animate([{ clipPath: `inset(0 round ${R}px)` }, { clipPath: clipFrom(el, box) }], { duration: 420, easing: 'cubic-bezier(.4, 0, .2, 1)', fill: 'forwards' });
+      setTimeout(() => m.remove(), shrink ? 430 : 360);
+      el.focus?.({ preventScroll: true });
+    };
+    const open = (el, stop) => {
+      if (modal) return;
+      const full = phone.matches;
+      modal = document.createElement('div'); modal.className = 'u-modal v-modal' + (full ? ' full' : ''); from = el;
+      modal.innerHTML = `<div class="u-walk v-walk"><iframe src="${new URL(`visita/index.html?embed=1${stop ? '#' + encodeURIComponent(stop) : ''}`, document.baseURI).href}" title="Visita 360° ao lazer do Platinum" allow="fullscreen" allowfullscreen></iframe></div>`;
+      modal.addEventListener('click', e => { if (e.target === modal) close(); });
+      document.body.append(modal); document.documentElement.classList.add('walking');
+      const box = modal.firstElementChild;
+      if (!full) box.animate([{ clipPath: clipFrom(el, box) }, { clipPath: `inset(0 round ${R}px)` }], { duration: 650, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+      history.pushState({ visita: 1 }, '');
+      box.querySelector('iframe').addEventListener('load', e => e.target.contentWindow.focus(), { once: true });
+    };
+    addEventListener('popstate', () => close(true));
+    addEventListener('message', e => { if (e.origin !== location.origin || !modal) return;
+      if (e.data?.visita === 'close') close();
+      if (e.data?.visita === 'talk') { close(); setTimeout(goContact, 450); } });
+    addEventListener('keydown', e => { if (e.key === 'Escape' && modal && !document.fullscreenElement) close(); });
+    // every link to the visit on this page (visita/, /visita/, ./visita/index.html…) opens the modal, never the page itself:
+    // one listener on window in the capture phase, so it runs before anything else can act on the click
+    const visitPath = new URL('visita/', document.baseURI).pathname;
+    addEventListener('click', e => {
+      if (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;   // new tab / window: the page itself
+      const a = e.target instanceof Element ? e.target.closest('a[href]') : null;
+      if (!a || (a.target && a.target !== '_self') || a.origin !== location.origin) return;
+      if (a.pathname !== visitPath && a.pathname !== visitPath + 'index.html') return;
+      e.preventDefault(); e.stopPropagation();
+      open(a.id === 'lobIn' ? a : document.getElementById('lobIn') || a, decodeURIComponent(a.hash.slice(1)));
+    }, true);
+  }
   // contact: an editorial block (big headline, numbered list, marquee). It rises into view once; the floating WhatsApp
   // steps aside while it is on screen (the contact has its own WhatsApp button)
   { const sec = document.getElementById('contato'), waFab = document.getElementById('waFab');

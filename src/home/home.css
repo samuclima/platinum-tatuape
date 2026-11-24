@@ -563,6 +563,9 @@ body:not(.has3d) .scene .view { display: none; }
 .u-modal.full .pv-rooms button { padding: 8px 13px; font-size: 12px; }
 .u-modal.full .u-hint { bottom: calc(max(10px, env(safe-area-inset-bottom)) + 46px); font-size: 11.5px; padding: 7px 12px; }
 html.walking, html.walking body { overflow: hidden; }
+/* the building visit in the same modal: an iframe of visita/?embed=1 */
+.v-walk { background: #1a1220 url(/platinum/img/lobby.jpg) center / cover no-repeat; }
+.v-walk iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
 /* ONE blue behind the cards and the visit button: the blue the statement panel ends with, the same the contact starts with */
 /* the fine grain on top dithers the long, slow gradient so it shows no 8-bit bands (they read as lines) */
 .dusk { background: #fff; }   /* the cards and the visit sit on white; only the contact is blue */
