@@ -25,8 +25,12 @@
 - [Apartamento de 61 m² com 2 dormitórios](https://lancamentoplatinum.com.br/plantas/apartamento-61m2-2-dormitorios/)
 - [Apartamento de 79 m² com 2 dormitórios](https://lancamentoplatinum.com.br/plantas/apartamento-79m2-2-dormitorios/)
 - [Apartamento de 93 m² com 3 dormitórios](https://lancamentoplatinum.com.br/plantas/apartamento-93m2-3-dormitorios/)
+- [Lazer](https://lancamentoplatinum.com.br/lazer/): os 23 espaços de lazer, pavimento por pavimento, com descrição
+- [Localização](https://lancamentoplatinum.com.br/localizacao/): endereço, metrô, vias, shoppings e parques próximos, com distâncias
 - [Visita 360° ao lazer](https://lancamentoplatinum.com.br/visita/): hall, térreo, 1º e 2º pavimento
 
 ## Opcional
+
+- [Texto completo do site](https://lancamentoplatinum.com.br/llms-full.txt): todas as páginas em texto, com as perguntas frequentes
 
 - [Política de privacidade](https://lancamentoplatinum.com.br/privacidade/)

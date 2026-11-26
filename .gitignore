@@ -41,6 +41,10 @@
 !/public/sitemap.xml
 !/public/consent.js
 !/public/privacidade/
+!/public/lazer/
+!/public/localizacao/
+!/public/llms-full.txt
+!/public/615507bd4c20498c60b87e2898726bcc.txt
 # (the old brochure page is ignored; the visit's loading screen uses one of its images)
 !/public/platinum/
 /public/platinum/*

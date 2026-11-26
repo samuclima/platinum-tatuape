@@ -74,6 +74,14 @@ footer div { max-width: 1180px; margin: 0 auto; display: flex; flex-wrap: wrap; 
 }.legal { max-width: 70ch; } .legal h2 { margin: 1.8em 0 .4em; font-size: 20px; color: var(--purple); } .legal p { margin: 0 0 1em; } .legal .btn { margin-left: 6px; cursor: pointer; background: none; font: inherit; font-weight: 700; font-size: 14px; } .legal .upd { color: var(--purple-dim); font-size: 14px; }
 .faq { margin-top: clamp(36px, 6vw, 64px); max-width: 78ch; } .faq details { border-bottom: 1px solid var(--hair); } .faq details:first-of-type { border-top: 1px solid var(--hair); }
 .faq summary { cursor: pointer; padding: 14px 0; font-weight: 600; color: var(--ink); } .faq details p { margin: 0 0 16px; max-width: 70ch; }
+.upd { margin-top: 32px; color: var(--purple-dim); font-size: 14px; }
+.cmp { width: 100%; border-collapse: collapse; font-size: 15px; } .cmp-w { margin-top: clamp(36px, 6vw, 64px); overflow-x: auto; }
+.cmp th, .cmp td { padding: 12px 10px; border-bottom: 1px solid var(--hair); text-align: left; white-space: nowrap; } .cmp thead th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--purple-dim); font-weight: 600; } .cmp tbody th a { font-weight: 700; color: var(--purple); } .cmp tbody th { white-space: normal; min-width: 12ch; }
+.lv { margin-top: clamp(36px, 6vw, 64px); } .lv > p { margin: -4px 0 18px; color: var(--purple-dim); }
+.sp { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; padding: 0; margin: 0; list-style: none; }
+.sp li { border-radius: 20px; overflow: hidden; background: #f6f3fb; } .sp img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; } .sp div { padding: 14px 18px 18px; }
+.sp h3 { margin: 0 0 6px; font-size: 18px; color: var(--purple); } .sp p { margin: 0; font-size: 15px; } .sp small { display: block; margin-top: 8px; font-size: 11px; color: var(--purple-dim); }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
 </head>
 <body>
@@ -97,9 +105,10 @@ footer div { max-width: 1180px; margin: 0 auto; display: flex; flex-wrap: wrap; 
   <section><h2>Ambientes</h2><ul class="rooms"><li>Banho 01</li><li>Banho 02</li><li>Cozinha</li><li>Suíte</li><li>Dorm. 01</li><li>Estar / Jantar</li><li>Terraço</li></ul></section>
 </div>
 <section class="faq" aria-labelledby="faqT"><h2 id="faqT">Perguntas sobre a planta de 61 m²</h2><details><summary>Quantos dormitórios tem o apartamento de 61 m² do Platinum Tatuapé?</summary><p>Tem 2 dormitórios, sendo 1 suíte, e 2 banheiros, com terraço gourmet.</p></details><details><summary>Quais ambientes tem a planta de 61 m²?</summary><p>A planta de 61 m² tem: Banho 01, Banho 02, Cozinha, Suíte, Dorm. 01, Estar / Jantar e Terraço. Plantas ilustrativas, sujeitas a alteração.</p></details><details><summary>Onde fica o apartamento de 61 m²?</summary><p>No Platinum Tatuapé by Diálogo, na Rua Platina, 1440, Tatuapé, zona leste de São Paulo, a 200 m da estação Carrão do metrô (Linha 3-Vermelha) e a 300 m da Radial Leste.</p></details><details><summary>Dá para ver o apartamento de 61 m² por dentro?</summary><p>Sim. Este site tem um tour 3D da planta de 61 m², com imagens 360° de cada ambiente.</p></details><details><summary>Qual é o valor do apartamento de 61 m²?</summary><p>A tabela de valores e as condições de lançamento são enviadas pelo atendimento do Platinum Tatuapé: WhatsApp +55 11 94394-7783 ou e-mail dabramo@lancamentoplatinum.com.br.</p></details></section>
+<p class="upd">Atualizado em 26 de novembro de 2026.</p>
 <section class="more" aria-labelledby="moreT"><h2 id="moreT">Outras plantas do Platinum Tatuapé</h2><ul><li><a href="/plantas/studio-27m2/"><b>27 m²</b><span>Studio</span></a></li><li><a href="/plantas/apartamento-33m2-1-suite/"><b>33 m²</b><span>1 suíte</span></a></li><li><a href="/plantas/apartamento-79m2-2-dormitorios/"><b>79 m²</b><span>2 dorms · 1 suíte</span></a></li><li><a href="/plantas/apartamento-93m2-3-dormitorios/"><b>93 m²</b><span>3 dorms · 1 suíte</span></a></li></ul></section>
 </main>
-<footer><div><span>Platinum Tatuapé by Diálogo · Rua Platina, 1440, Tatuapé, São Paulo</span><span><a href="/">Página inicial</a> · <a href="/plantas/">Plantas</a> · <a href="/visita/">Visita 360°</a> · <a href="mailto:dabramo@lancamentoplatinum.com.br">dabramo@lancamentoplatinum.com.br</a> · <a href="/privacidade/">Privacidade</a></span></div>
+<footer><div><span>Platinum Tatuapé by Diálogo · Rua Platina, 1440, Tatuapé, São Paulo</span><span><a href="/">Página inicial</a> · <a href="/plantas/">Plantas</a> · <a href="/visita/">Visita 360°</a> · <a href="/lazer/">Lazer</a> · <a href="/localizacao/">Localização</a> · <a href="mailto:dabramo@lancamentoplatinum.com.br">dabramo@lancamentoplatinum.com.br</a> · <a href="/privacidade/">Privacidade</a></span></div>
 <div style="margin-top:10px"><span>Imagens e plantas ilustrativas, sujeitas a alteração. Realização e construção: Diálogo Engenharia.</span></div></footer>
 </body>
 </html>
